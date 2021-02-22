@@ -7,8 +7,6 @@
 <h1 align="center">Sylius Upgrade Plugin</h1>
 
 <p align="center">This plugin helps you to upgrade your Sylius app to a new version.</p>
-<p align="center">All features are implemented as console commands and actually there is only one:</p>
-<p align="center">* Template changes, print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that has been overridden in the project (in "templates" dir or in a theme).</p>
 
 
 ## Table of Contents
@@ -16,6 +14,7 @@
 - [Table of Contents](#table-of-contents)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Usage](#usage)
 - [License](#license)
 - [Credits](#credits)
 
@@ -33,6 +32,16 @@
     ```php
     Webgriffe\SyliusUpgradePlugin\WebgriffeSyliusUpgradePlugin::class => ['all' => true],
     ```
+
+## Usage
+
+All features are implemented as **console commands**.
+
+### Template changes
+
+    webgriffe:upgrade:template-changes
+
+Print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that has been overridden in the project (in "templates" dir or in a theme).
 
 ## Contributing
 
