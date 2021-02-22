@@ -1,0 +1,4 @@
+suites:
+    main:
+        namespace: Webgriffe\SyliusUpgradePlugin
+        psr4_prefix: Webgriffe\SyliusUpgradePlugin
