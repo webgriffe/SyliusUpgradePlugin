@@ -6,3 +6,9 @@ imports:
 # see https://github.com/FriendsOfBehat/SymfonyExtension/issues/88
 services:
     Symfony\Component\BrowserKit\AbstractBrowser: '@test.client'
+
+    webgriffe_sylius_upgrade.command.template_changes:
+        class: Webgriffe\SyliusUpgradePlugin\Command\TemplateChangesCommand
+        arguments:
+            - 'vfs://root'
+        tags: { name: "console.command" }
