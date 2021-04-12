@@ -8,10 +8,12 @@ use org\bovigo\vfs\vfsStream;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Tests\Webgriffe\SyliusUpgradePlugin\Stub\Client\Git;
 use Webgriffe\SyliusUpgradePlugin\Command\TemplateChangesCommand;
 
 final class TemplateChangesCommandTest extends KernelTestCase
 {
+    private const FIXTURE_DIR = __DIR__ . '/../DataFixtures/Command/TemplateChangesCommandTest/';
 
     /** @var CommandTester */
     private $commandTester;
@@ -30,9 +32,13 @@ final class TemplateChangesCommandTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_is_executable(): void
+    public function it_is_executable_with_mandatory_parameters(): void
     {
-        $return = $this->commandTester->execute([]);
+        $return = $this->commandTester->execute([
+            TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+            TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+        ]);
+
         self::assertEquals(0, $return);
     }
 
@@ -41,7 +47,8 @@ final class TemplateChangesCommandTest extends KernelTestCase
      */
     public function it_outputs_filepaths_of_overridden_template_files_that_changed_between_two_given_versions(): void
     {
-        vfsStream::copyFromFileSystem(__DIR__ . '/../DataFixtures/Command/TemplateChangesCommandTest/it_outputs_filepaths_of_overridden_template_files_that_changed_between_two_given_versions/');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
 
         $return = $this->commandTester->execute([
             TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
@@ -51,7 +58,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
         self::assertEquals(0, $return);
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
-Computing differences between 1.8.4 and 1.8.8: https://github.com/Sylius/Sylius/compare/v1.8.4...v1.8.8.diff
+Computing differences between 1.8.4 and 1.8.8
 
 Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
 Found 2 files that changed and was overridden:

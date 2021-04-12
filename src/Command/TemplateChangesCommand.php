@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webmozart\Glob\Glob;
 
 final class TemplateChangesCommand extends Command
@@ -26,10 +27,14 @@ final class TemplateChangesCommand extends Command
     /** @var OutputInterface */
     private $output;
 
-    public function __construct(string $rootPath, string $name = null)
+    /** @var GitInterface */
+    private $gitClient;
+
+    public function __construct(GitInterface $gitClient, string $rootPath, string $name = null)
     {
         parent::__construct($name);
 
+        $this->gitClient = $gitClient;
         $this->rootPath = rtrim($rootPath, \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR;
     }
 
@@ -79,13 +84,8 @@ final class TemplateChangesCommand extends Command
      */
     private function getFilesChangedBetweenTwoVersions(string $fromVersion, string $toVersion): array
     {
-        $url = 'https://github.com/Sylius/Sylius/compare/v' . $fromVersion . '...v' . $toVersion . '.diff';
-        $this->output->writeln(sprintf('Computing differences between %s and %s: %s', $fromVersion, $toVersion, $url));
-        $diff = @file_get_contents($url);
-        if ($diff === false) {
-            $this->output->writeln('Error: one or both given versions does not exists.');
-            exit(1);
-        }
+        $this->output->writeln(sprintf('Computing differences between %s and %s', $fromVersion, $toVersion));
+        $diff = $this->gitClient->getDiffBetweenTags($fromVersion, $toVersion);
         $versionChangedFiles = [];
         $diffLines = explode(\PHP_EOL, $diff);
         foreach ($diffLines as $diffLine) {
