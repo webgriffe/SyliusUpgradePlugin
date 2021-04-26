@@ -24,7 +24,7 @@ final class TemplateChangesCommand extends Command
     /** @var string */
     private $rootPath;
 
-    /** @var OutputInterface */
+    /** @var OutputInterface|null */
     private $output;
 
     /** @var GitInterface */
@@ -84,7 +84,7 @@ final class TemplateChangesCommand extends Command
      */
     private function getFilesChangedBetweenTwoVersions(string $fromVersion, string $toVersion): array
     {
-        $this->output->writeln(sprintf('Computing differences between %s and %s', $fromVersion, $toVersion));
+        $this->writeLine(sprintf('Computing differences between %s and %s', $fromVersion, $toVersion));
         $diff = $this->gitClient->getDiffBetweenTags($fromVersion, $toVersion);
         $versionChangedFiles = [];
         $diffLines = explode(\PHP_EOL, $diff);
@@ -112,14 +112,14 @@ final class TemplateChangesCommand extends Command
     private function computeTemplateFilesChangedAndOverridden(array $versionChangedFiles): void
     {
         $targetDir = $this->rootPath . self::TEMPLATES_BUNDLES_SUBDIR;
-        $this->output->writeln('');
-        $this->output->writeln(sprintf('Searching "%s" for overridden files that changed between the two versions.', $targetDir));
+        $this->writeLine('');
+        $this->writeLine(sprintf('Searching "%s" for overridden files that changed between the two versions.', $targetDir));
         $templateFilenames = $this->getProjectTemplatesFiles($targetDir);
         /** @var string[] $overriddenTemplateFiles */
         $overriddenTemplateFiles = array_intersect($versionChangedFiles, $templateFilenames);
-        $this->output->writeln(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
+        $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
         foreach ($overriddenTemplateFiles as $file) {
-            $this->output->writeln("\t" . $file);
+            $this->writeLine("\t" . $file);
         }
     }
 
@@ -138,5 +138,13 @@ final class TemplateChangesCommand extends Command
             },
             $files
         );
+    }
+
+    private function writeLine(string $message): void
+    {
+        if ($this->output === null) {
+            return;
+        }
+        $this->output->writeln($message);
     }
 }
