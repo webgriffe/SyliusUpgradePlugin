@@ -6,7 +6,6 @@
     "license": "MIT",
     "require": {
         "php": "^7.3",
-        "sylius-labs/coding-standard": "^4.0",
         "sylius/sylius": "~1.8.0 || ~1.9.0",
         "webmozart/glob": "^4.3"
     },
@@ -36,6 +35,7 @@
         "phpstan/phpstan-webmozart-assert": "0.12.12",
         "phpunit/phpunit": "^9.5",
         "sensiolabs/security-checker": "^6.0",
+        "sylius-labs/coding-standard": "^4.0",
         "symfony/browser-kit": "^4.4 || ^5.2",
         "symfony/debug-bundle": "^4.4 || ^5.2",
         "symfony/dotenv": "^4.4 || ^5.2",
