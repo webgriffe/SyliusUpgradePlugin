@@ -164,11 +164,12 @@ final class TemplateChangesCommand extends Command
     {
         $targetDir = $this->rootPath . 'themes/' . $themeName . '/';
 
+        $this->writeLine('');
         if (!is_dir($targetDir)) {
-            // todo
+            $this->writeLine(sprintf('ERROR: Cannot search "%s" cause it does not exists.', $targetDir));
+
             return;
         }
-        $this->writeLine('');
         $this->writeLine(sprintf('Searching "%s" for overridden files that changed between the two versions.', $targetDir));
         $templateFilenames = $this->getProjectThemesFiles($targetDir);
         /** @var string[] $overriddenTemplateFiles */

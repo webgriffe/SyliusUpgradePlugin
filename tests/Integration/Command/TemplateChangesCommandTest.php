@@ -108,4 +108,35 @@ TXT;
 
         self::assertEquals($expectedOutput, $output);
     }
+
+    /**
+     * @test
+     */
+    public function it_outputs_error_message_when_given_theme_name_directory_does_not_exists(): void
+    {
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+
+        $return = $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme'
+            ]
+        );
+
+        self::assertEquals(0, $return);
+        $output = $this->commandTester->getDisplay();
+        $expectedOutput = <<<TXT
+Computing differences between 1.8.4 and 1.8.8
+
+Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
+Found 0 files that changed and was overridden.
+
+ERROR: Cannot search "vfs://root/themes/my-theme/" cause it does not exists.
+
+TXT;
+
+        self::assertEquals($expectedOutput, $output);
+    }
 }
