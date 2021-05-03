@@ -47,6 +47,28 @@ final class TemplateChangesCommandTest extends KernelTestCase
     /**
      * @test
      */
+    public function it_throws_when_from_version_argument_is_not_valid(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Argument "from" is not a valid non-empty string');
+
+        $this->commandTester->execute([TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '', TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '']);
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_when_to_version_argument_is_not_valid(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Argument "to" is not a valid non-empty string');
+
+        $this->commandTester->execute([TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4', TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '']);
+    }
+
+    /**
+     * @test
+     */
     public function it_outputs_filepaths_of_overridden_template_files_in_templates_dir_that_changed_between_two_given_versions(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
@@ -114,6 +136,26 @@ TXT;
      */
     public function it_outputs_error_message_when_given_theme_name_directory_does_not_exists(): void
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Cannot search "vfs://root/themes/my-theme/" cause it does not exists');
+
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+
+        $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme'
+            ]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_outputs_proper_messages_when_there_arent_changed_files_in_both_templates_and_theme_dirs(): void
+    {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
         vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
 
@@ -133,7 +175,8 @@ Computing differences between 1.8.4 and 1.8.8
 Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
 Found 0 files that changed and was overridden.
 
-ERROR: Cannot search "vfs://root/themes/my-theme/" cause it does not exists.
+Searching "vfs://root/themes/my-theme/" for overridden files that changed between the two versions.
+Found 0 files that changed and was overridden.
 
 TXT;
 

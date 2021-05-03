@@ -71,14 +71,13 @@ final class TemplateChangesCommand extends Command
         $this->output = $output;
 
         $fromVersion = $input->getArgument(self::FROM_VERSION_ARGUMENT_NAME);
-        if (!is_string($fromVersion)) {
-            // todo
-            return 1;
+        if (!is_string($fromVersion) || trim($fromVersion) === '') {
+            throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::FROM_VERSION_ARGUMENT_NAME));
         }
+
         $toVersion = $input->getArgument(self::TO_VERSION_ARGUMENT_NAME);
-        if (!is_string($toVersion)) {
-            // todo
-            return 1;
+        if (!is_string($toVersion) || trim($fromVersion) === '') {
+            throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::TO_VERSION_ARGUMENT_NAME));
         }
 
         $themeName = $input->getOption(self::THEME_OPTION_NAME);
@@ -166,9 +165,7 @@ final class TemplateChangesCommand extends Command
 
         $this->writeLine('');
         if (!is_dir($targetDir)) {
-            $this->writeLine(sprintf('ERROR: Cannot search "%s" cause it does not exists.', $targetDir));
-
-            return;
+            throw new \RuntimeException(sprintf('Cannot search "%s" cause it does not exists.', $targetDir));
         }
         $this->writeLine(sprintf('Searching "%s" for overridden files that changed between the two versions.', $targetDir));
         $templateFilenames = $this->getProjectThemesFiles($targetDir);
