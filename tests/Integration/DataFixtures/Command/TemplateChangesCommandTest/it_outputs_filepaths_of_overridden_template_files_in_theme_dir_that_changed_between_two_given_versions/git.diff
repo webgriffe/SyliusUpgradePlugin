@@ -1,0 +1,72 @@
+diff --git a/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/Address/_form.html.twig b/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/Address/_form.html.twig
+index e66219e1470..e7b7ec6b845 100644
+--- a/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/Address/_form.html.twig
++++ b/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/Address/_form.html.twig
+@@ -1,7 +1,7 @@
+ <div id="sylius-billing-address" {{ sylius_test_html_attribute('billing-address') }}>
+     {% include '@SyliusShop/Checkout/Address/_addressBookSelect.html.twig' %}
+     <h3 class="ui dividing header">{{ 'sylius.ui.billing_address'|trans }}</h3>
+-    {% if form.customer is defined %}
++    {% if app.user is null %}
+         {% include '@SyliusShop/Common/Form/_login.html.twig' with {'form': form.customer} %}
+     {% endif %}
+     {% include '@SyliusShop/Common/Form/_address.html.twig' with {'form': form.billingAddress, 'order': order, 'type': 'billing'} %}
+diff --git a/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/_header.html.twig b/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/_header.html.twig
+index 3497b547dc2..9f9c3e252e4 100644
+--- a/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/_header.html.twig
++++ b/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/_header.html.twig
+@@ -5,7 +5,7 @@
+         </div>
+         <div class="right menu">
+             {% if order.customer.id|default(null) is not null %}
+-                <div class="item" id="purchaser-email" {{ sylius_test_html_attribute('purchaser-name-or-email') }}>{{ 'sylius.ui.checking_out_as'|trans }} {{ order.customer.fullName|default(order.customer.email) }}.</div>
++                <div class="item" id="purchaser-email" {{ sylius_test_html_attribute('purchaser-name-or-email') }}>{{ 'sylius.ui.checking_out_as'|trans }} {{ app.user is null ? order.customer.email : order.customer.fullName|default(order.customer.email) }}.</div>
+             {% else %}
+                 <a href="{{ path('sylius_shop_login') }}" class="item">{{ 'sylius.ui.sign_in'|trans }}</a>
+             {% endif %}
+diff --git a/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig b/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig
+index 58432905dd5..64e9fd2a418 100644
+--- a/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig
++++ b/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig
+@@ -61,8 +61,8 @@
+             {%- for child in form %}
+                 <div class="field">
+                     <div class="ui toggle checkbox">
+-                        {{- form_label(child, null, {translation_domain: choice_translation_domain}) -}}
+                         {{- form_widget(child, sylius_test_form_attribute('option')) -}}
++                        {{- form_label(child, null, {translation_domain: choice_translation_domain}) -}}
+                     </div>
+                 </div>
+             {% endfor -%}
+diff --git a/src/Sylius/Bundle/AdminBundle/Resources/views/PaymentMethod/_form.html.twig b/src/Sylius/Bundle/AdminBundle/Resources/views/PaymentMethod/_form.html.twig
+index bf81276fb22..b96c7c308d7 100644
+--- a/src/Sylius/Bundle/AdminBundle/Resources/views/PaymentMethod/_form.html.twig
++++ b/src/Sylius/Bundle/AdminBundle/Resources/views/PaymentMethod/_form.html.twig
+@@ -28,6 +28,17 @@
+             </div>
+         </div>
+     {% endif %}
++    {% if resource.gatewayConfig.factoryName == 'paypal_express_checkout' %}
++        <div class="ui icon negative orange message sylius-flash-message">
++            <i class="close icon"></i>
++            <i class="warning icon"></i>
++            <div class="content">
++                <div class="header">
++                    {% autoescape false %}{{ 'sylius.ui.gateway.pay_pal_express_checkout_deprecation_notice'|trans }}{% endautoescape %}
++                </div>
++            </div>
++        </div>
++    {% endif %}
+
+     {{ form_row(form.gatewayConfig.factoryName) }}
+     {% if form.gatewayConfig.config is defined %}
+diff --git a/src/Sylius/Bundle/AdminBundle/Resources/views/Product/_mainImage.html.twig b/src/Sylius/Bundle/AdminBundle/Resources/views/Product/_mainImage.html.twig
+index 288d4dc0da3..3fe65b825b3 100644
+--- a/src/Sylius/Bundle/AdminBundle/Resources/views/Product/_mainImage.html.twig
++++ b/src/Sylius/Bundle/AdminBundle/Resources/views/Product/_mainImage.html.twig
+@@ -6,4 +6,4 @@
+     {% set path = '//placehold.it/50x50' %}
+ {% endif %}
+
+-<img src="{{ path }}" alt="" class="ui bordered image" />
++<img src="{{ path }}" alt="" class="ui bordered image sylius-grid-image" />

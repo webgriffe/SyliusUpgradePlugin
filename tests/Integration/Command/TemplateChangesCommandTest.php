@@ -34,10 +34,12 @@ final class TemplateChangesCommandTest extends KernelTestCase
      */
     public function it_is_executable_with_mandatory_parameters(): void
     {
-        $return = $this->commandTester->execute([
-            TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
-            TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-        ]);
+        $return = $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+            ]
+        );
 
         self::assertEquals(0, $return);
     }
@@ -45,15 +47,17 @@ final class TemplateChangesCommandTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_outputs_filepaths_of_overridden_template_files_that_changed_between_two_given_versions(): void
+    public function it_outputs_filepaths_of_overridden_template_files_in_templates_dir_that_changed_between_two_given_versions(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
         vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
 
-        $return = $this->commandTester->execute([
-            TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
-            TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-        ]);
+        $return = $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+            ]
+        );
 
         self::assertEquals(0, $return);
         $output = $this->commandTester->getDisplay();
@@ -64,6 +68,41 @@ Searching "vfs://root/templates/bundles/" for overridden files that changed betw
 Found 2 files that changed and was overridden:
 	SyliusShopBundle/Checkout/Address/_form.html.twig
 	SyliusUiBundle/Form/theme.html.twig
+
+TXT;
+
+        self::assertEquals($expectedOutput, $output);
+    }
+
+    /**
+     * @test
+     */
+    public function it_outputs_filepaths_of_overridden_template_files_in_theme_dir_that_changed_between_two_given_versions(): void
+    {
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+
+        $return = $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme'
+            ]
+        );
+
+        self::assertEquals(0, $return);
+        $output = $this->commandTester->getDisplay();
+        $expectedOutput = <<<TXT
+Computing differences between 1.8.4 and 1.8.8
+
+Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
+Found 0 files that changed and was overridden.
+
+Searching "vfs://root/themes/my-theme/" for overridden files that changed between the two versions.
+Found 3 files that changed and was overridden:
+	SyliusShopBundle/Checkout/_header.html.twig
+	SyliusUiBundle/Form/theme.html.twig
+	SyliusAdminBundle/Product/_mainImage.html.twig
 
 TXT;
 

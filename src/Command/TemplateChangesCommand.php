@@ -7,6 +7,7 @@ namespace Webgriffe\SyliusUpgradePlugin\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webmozart\Glob\Glob;
@@ -16,6 +17,8 @@ final class TemplateChangesCommand extends Command
     public const FROM_VERSION_ARGUMENT_NAME = 'from';
 
     public const TO_VERSION_ARGUMENT_NAME = 'to';
+
+    public const THEME_OPTION_NAME = 'theme';
 
     private const TEMPLATES_BUNDLES_SUBDIR = 'templates/bundles/';
 
@@ -54,6 +57,12 @@ final class TemplateChangesCommand extends Command
                 self::TO_VERSION_ARGUMENT_NAME,
                 InputArgument::REQUIRED,
                 'Target Sylius version to use for changes computation.'
+            )
+            ->addOption(
+                self::THEME_OPTION_NAME,
+                't',
+                InputOption::VALUE_OPTIONAL,
+                'Name of the theme for which check the templates that changed.'
             );
     }
 
@@ -71,10 +80,16 @@ final class TemplateChangesCommand extends Command
             // todo
             return 1;
         }
+
+        $themeName = $input->getOption(self::THEME_OPTION_NAME);
+
         $versionChangedFiles = $this->getFilesChangedBetweenTwoVersions($fromVersion, $toVersion);
         $this->computeTemplateFilesChangedAndOverridden($versionChangedFiles);
 
-        // todo: compute theme files
+        if ($themeName !== null && is_string($themeName)) {
+            $this->computeThemeTemplateFilesChangedAndOverridden($versionChangedFiles, $themeName);
+            // todo: theme templates file path changes between SyliusThemeBundle 1.x and 2.x
+        }
 
         return 0;
     }
@@ -117,6 +132,11 @@ final class TemplateChangesCommand extends Command
         $templateFilenames = $this->getProjectTemplatesFiles($targetDir);
         /** @var string[] $overriddenTemplateFiles */
         $overriddenTemplateFiles = array_intersect($versionChangedFiles, $templateFilenames);
+        if (count($overriddenTemplateFiles) === 0) {
+            $this->writeLine('Found 0 files that changed and was overridden.');
+
+            return;
+        }
         $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
         foreach ($overriddenTemplateFiles as $file) {
             $this->writeLine("\t" . $file);
@@ -135,6 +155,47 @@ final class TemplateChangesCommand extends Command
         return array_map(
             static function (string $file) use ($targetDir): string {
                 return str_replace($targetDir, '', $file);
+            },
+            $files
+        );
+    }
+
+    private function computeThemeTemplateFilesChangedAndOverridden(array $versionChangedFiles, string $themeName): void
+    {
+        $targetDir = $this->rootPath . 'themes/' . $themeName . '/';
+
+        if (!is_dir($targetDir)) {
+            // todo
+            return;
+        }
+        $this->writeLine('');
+        $this->writeLine(sprintf('Searching "%s" for overridden files that changed between the two versions.', $targetDir));
+        $templateFilenames = $this->getProjectThemesFiles($targetDir);
+        /** @var string[] $overriddenTemplateFiles */
+        $overriddenTemplateFiles = array_intersect($versionChangedFiles, $templateFilenames);
+        if (count($overriddenTemplateFiles) === 0) {
+            $this->writeLine('Found 0 files that changed and was overridden.');
+
+            return;
+        }
+        $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
+        foreach ($overriddenTemplateFiles as $file) {
+            $this->writeLine("\t" . $file);
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getProjectThemesFiles(string $targetDir): array
+    {
+        $files = Glob::glob($targetDir . 'Sylius*Bundle/**/' . '*.html.twig');
+
+        // from /Users/luke/workspace/project/themes/my-theme/SyliusAdminBundle/views/PaymentMethod/_form.html.twig
+        // to SyliusAdminBundle/PaymentMethod/_form.html.twig
+        return array_map(
+            static function (string $file) use ($targetDir): string {
+                return str_replace([$targetDir, '/views/'], ['', '/'], $file);
             },
             $files
         );
