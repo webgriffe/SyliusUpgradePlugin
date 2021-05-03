@@ -76,7 +76,7 @@ final class TemplateChangesCommand extends Command
         }
 
         $toVersion = $input->getArgument(self::TO_VERSION_ARGUMENT_NAME);
-        if (!is_string($toVersion) || trim($fromVersion) === '') {
+        if (!is_string($toVersion) || trim($toVersion) === '') {
             throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::TO_VERSION_ARGUMENT_NAME));
         }
 
