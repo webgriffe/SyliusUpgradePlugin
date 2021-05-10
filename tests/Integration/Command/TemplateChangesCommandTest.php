@@ -108,7 +108,8 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme'
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme',
+                '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
             ]
         );
 
@@ -146,7 +147,8 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme'
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme',
+                '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
             ]
         );
     }
@@ -155,6 +157,39 @@ TXT;
      * @test
      */
     public function it_outputs_proper_messages_when_there_arent_changed_files_in_both_templates_and_theme_dirs(): void
+    {
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+
+        $return = $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme',
+                '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
+            ]
+        );
+
+        self::assertEquals(0, $return);
+        $output = $this->commandTester->getDisplay();
+        $expectedOutput = <<<TXT
+Computing differences between 1.8.4 and 1.8.8
+
+Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
+Found 0 files that changed and was overridden.
+
+Searching "vfs://root/themes/my-theme/" for overridden files that changed between the two versions.
+Found 0 files that changed and was overridden.
+
+TXT;
+
+        self::assertEquals($expectedOutput, $output);
+    }
+
+    /**
+     * @test
+     */
+    public function it_outputs_filepaths_of_overridden_template_files_in_theme_dir_that_changed_between_two_given_versions_with_new_theme_bundles_path_location(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
         vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
@@ -175,8 +210,10 @@ Computing differences between 1.8.4 and 1.8.8
 Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
 Found 0 files that changed and was overridden.
 
-Searching "vfs://root/themes/my-theme/" for overridden files that changed between the two versions.
-Found 0 files that changed and was overridden.
+Searching "vfs://root/themes/my-theme/templates/bundles/" for overridden files that changed between the two versions.
+Found 2 files that changed and was overridden:
+	SyliusShopBundle/Checkout/_header.html.twig
+	SyliusUiBundle/Form/theme.html.twig
 
 TXT;
 

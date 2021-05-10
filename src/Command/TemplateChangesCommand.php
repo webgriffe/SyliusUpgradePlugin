@@ -20,6 +20,8 @@ final class TemplateChangesCommand extends Command
 
     public const THEME_OPTION_NAME = 'theme';
 
+    public const LEGACY_MODE_OPTION_NAME = 'legacy';
+
     private const TEMPLATES_BUNDLES_SUBDIR = 'templates/bundles/';
 
     protected static $defaultName = 'webgriffe:upgrade:template-changes';
@@ -61,9 +63,16 @@ final class TemplateChangesCommand extends Command
             ->addOption(
                 self::THEME_OPTION_NAME,
                 't',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Name of the theme for which check the templates that changed.'
-            );
+            )
+            ->addOption(
+                self::LEGACY_MODE_OPTION_NAME,
+                'l',
+                InputOption::VALUE_NONE,
+                'Use legacy mode for theme bundle paths: from version 2.0 of the SyliusThemeBundle the theme structure has changed. More info here: https://github.com/Sylius/SyliusThemeBundle/blob/master/UPGRADE.md#upgrade-from-1x-to-20'
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -81,13 +90,13 @@ final class TemplateChangesCommand extends Command
         }
 
         $themeName = $input->getOption(self::THEME_OPTION_NAME);
+        $legacyMode = (bool) $input->getOption(self::LEGACY_MODE_OPTION_NAME);
 
         $versionChangedFiles = $this->getFilesChangedBetweenTwoVersions($fromVersion, $toVersion);
         $this->computeTemplateFilesChangedAndOverridden($versionChangedFiles);
 
         if ($themeName !== null && is_string($themeName)) {
-            $this->computeThemeTemplateFilesChangedAndOverridden($versionChangedFiles, $themeName);
-            // todo: theme templates file path changes between SyliusThemeBundle 1.x and 2.x
+            $this->computeThemeTemplateFilesChangedAndOverridden($versionChangedFiles, $themeName, $legacyMode);
         }
 
         return 0;
@@ -136,6 +145,7 @@ final class TemplateChangesCommand extends Command
 
             return;
         }
+
         $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
         foreach ($overriddenTemplateFiles as $file) {
             $this->writeLine("\t" . $file);
@@ -159,16 +169,21 @@ final class TemplateChangesCommand extends Command
         );
     }
 
-    private function computeThemeTemplateFilesChangedAndOverridden(array $versionChangedFiles, string $themeName): void
+    private function computeThemeTemplateFilesChangedAndOverridden(array $versionChangedFiles, string $themeName, bool $legacyMode): void
     {
         $targetDir = $this->rootPath . 'themes/' . $themeName . '/';
+        if (!$legacyMode) {
+            $targetDir .= self::TEMPLATES_BUNDLES_SUBDIR;
+        }
 
         $this->writeLine('');
         if (!is_dir($targetDir)) {
             throw new \RuntimeException(sprintf('Cannot search "%s" cause it does not exists.', $targetDir));
         }
+
         $this->writeLine(sprintf('Searching "%s" for overridden files that changed between the two versions.', $targetDir));
-        $templateFilenames = $this->getProjectThemesFiles($targetDir);
+        $templateFilenames = $legacyMode ? $this->getProjectLegacyThemeFiles($targetDir) : $this->getProjectTemplatesFiles($targetDir);
+
         /** @var string[] $overriddenTemplateFiles */
         $overriddenTemplateFiles = array_intersect($versionChangedFiles, $templateFilenames);
         if (count($overriddenTemplateFiles) === 0) {
@@ -176,6 +191,7 @@ final class TemplateChangesCommand extends Command
 
             return;
         }
+
         $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
         foreach ($overriddenTemplateFiles as $file) {
             $this->writeLine("\t" . $file);
@@ -185,7 +201,7 @@ final class TemplateChangesCommand extends Command
     /**
      * @return string[]
      */
-    private function getProjectThemesFiles(string $targetDir): array
+    private function getProjectLegacyThemeFiles(string $targetDir): array
     {
         $files = Glob::glob($targetDir . 'Sylius*Bundle/**/' . '*.html.twig');
 
