@@ -22,7 +22,7 @@ final class TemplateChangesCommand extends Command
 
     public const LEGACY_MODE_OPTION_NAME = 'legacy';
 
-    private const TEMPLATES_BUNDLES_SUBDIR = 'templates/bundles/';
+    private const TEMPLATES_BUNDLES_SUBDIR = 'templates' . \DIRECTORY_SEPARATOR . 'bundles' . \DIRECTORY_SEPARATOR;
 
     protected static $defaultName = 'webgriffe:upgrade:template-changes';
 
@@ -71,8 +71,7 @@ final class TemplateChangesCommand extends Command
                 'l',
                 InputOption::VALUE_NONE,
                 'Use legacy mode for theme bundle paths: from version 2.0 of the SyliusThemeBundle the theme structure has changed. More info here: https://github.com/Sylius/SyliusThemeBundle/blob/master/UPGRADE.md#upgrade-from-1x-to-20'
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -117,7 +116,7 @@ final class TemplateChangesCommand extends Command
             }
             $diffLineParts = explode(' ', $diffLine);
             $changedFileName = substr($diffLineParts[2], 2);
-            if (strpos($changedFileName, 'Resources/views') === false) {
+            if (strpos($changedFileName, 'Resources' . \DIRECTORY_SEPARATOR . 'views') === false) {
                 continue;
             }
             $versionChangedFiles[] = $changedFileName;
@@ -126,7 +125,17 @@ final class TemplateChangesCommand extends Command
         // src/Sylius/Bundle/AdminBundle/Resources/views/PaymentMethod/_form.html.twig -> SyliusAdminBundle/PaymentMethod/_form.html.twig
         return array_map(
             static function (string $versionChangedFile): string {
-                return str_replace(['src/Sylius/Bundle/', '/Resources/views'], ['Sylius', ''], $versionChangedFile);
+                return str_replace(
+                    [
+                        'src' . \DIRECTORY_SEPARATOR . 'Sylius' . \DIRECTORY_SEPARATOR . 'Bundle' . \DIRECTORY_SEPARATOR,
+                        \DIRECTORY_SEPARATOR . 'Resources' . \DIRECTORY_SEPARATOR . 'views',
+                    ],
+                    [
+                        'Sylius',
+                        '',
+                    ],
+                    $versionChangedFile
+                );
             },
             $versionChangedFiles
         );
@@ -157,7 +166,7 @@ final class TemplateChangesCommand extends Command
      */
     private function getProjectTemplatesFiles(string $targetDir): array
     {
-        $files = Glob::glob($targetDir . 'Sylius*Bundle/**/' . '*.html.twig');
+        $files = Glob::glob($targetDir . 'Sylius*Bundle' . \DIRECTORY_SEPARATOR . '**' . \DIRECTORY_SEPARATOR . '*.html.twig');
 
         // from /Users/user/workspace/project/templates/bundles/SyliusAdminBundle/PaymentMethod/_form.html.twig
         // to SyliusAdminBundle/PaymentMethod/_form.html.twig
@@ -171,7 +180,7 @@ final class TemplateChangesCommand extends Command
 
     private function computeThemeTemplateFilesChangedAndOverridden(array $versionChangedFiles, string $themeName, bool $legacyMode): void
     {
-        $targetDir = $this->rootPath . 'themes/' . $themeName . '/';
+        $targetDir = $this->rootPath . 'themes' . \DIRECTORY_SEPARATOR . $themeName . \DIRECTORY_SEPARATOR;
         if (!$legacyMode) {
             $targetDir .= self::TEMPLATES_BUNDLES_SUBDIR;
         }
@@ -203,13 +212,13 @@ final class TemplateChangesCommand extends Command
      */
     private function getProjectLegacyThemeFiles(string $targetDir): array
     {
-        $files = Glob::glob($targetDir . 'Sylius*Bundle/**/' . '*.html.twig');
+        $files = Glob::glob($targetDir . 'Sylius*Bundle' . \DIRECTORY_SEPARATOR . '**' . \DIRECTORY_SEPARATOR . '*.html.twig');
 
         // from /Users/luke/workspace/project/themes/my-theme/SyliusAdminBundle/views/PaymentMethod/_form.html.twig
         // to SyliusAdminBundle/PaymentMethod/_form.html.twig
         return array_map(
             static function (string $file) use ($targetDir): string {
-                return str_replace([$targetDir, '/views/'], ['', '/'], $file);
+                return str_replace([$targetDir, \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR], ['', \DIRECTORY_SEPARATOR], $file);
             },
             $files
         );
