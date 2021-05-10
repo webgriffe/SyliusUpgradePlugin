@@ -4,9 +4,11 @@
     </a>
 </p>
 
-<h1 align="center">Sylius Upgrade Plugin</h1>
+<h1 align="center">Upgrade Plugin</h1>
 
 <p align="center">This plugin helps you to upgrade your Sylius app to a new version.</p>
+
+<p align="center"><a href="https://github.com/webgriffe/SyliusUpgradePlugin/actions"><img src="https://github.com/webgriffe/SyliusUpgradePlugin/workflows/Build/badge.svg" alt="Build Status" /></a></p>
 
 
 ## Table of Contents
@@ -25,12 +27,12 @@
 
 ## Installation
 
-1. Run `composer require webgriffe/sylius-upgrade-plugin`.
+1. Run `composer require --dev webgriffe/sylius-upgrade-plugin dev-master`.
 
 2. Add the plugin to the `config/bundles.php` file:
 
     ```php
-    Webgriffe\SyliusUpgradePlugin\WebgriffeSyliusUpgradePlugin::class => ['all' => true],
+    Webgriffe\SyliusUpgradePlugin\WebgriffeSyliusUpgradePlugin::class => ['dev' => true, 'test' => true],
     ```
 
 ## Usage
@@ -39,9 +41,28 @@ All features are implemented as **console commands**.
 
 ### Template changes
 
-    webgriffe:upgrade:template-changes
+    webgriffe:upgrade:template-changes <from-version> <to-version> [--theme=YOUR_THEME] [--legacy] 
 
-Print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that has been overridden in the project (in "templates" dir or in a theme).
+Print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that has been overridden in your project: in root "templates" folder and/or in a custom theme.
+
+You have to specify both the versions **from** and **to** you want to compute the changes.
+
+There are two optional parameters:
+* **--theme=YOUR_THEME**, specify the theme folder in which to search for changed files;
+* **--legacy**, use legacy theme folder structure. From v2.0 of the [SyliusThemeBundle](https://github.com/Sylius/SyliusThemeBundle/) the theme folder structure has changed. The old structure has been deprecated and will be removed in v3.0 as stated [here](https://github.com/Sylius/SyliusThemeBundle/blob/master/UPGRADE.md#upgrade-from-1x-to-20). 
+
+
+#### Examples
+
+* List of templates that changed between Sylius v1.8.4 and v1.8.8 and that were overridden in your root **templates** folder:
+
+    
+    webgriffe:upgrade:template-changes v1.8.4 v1.8.8
+
+* List of templates that changed between Sylius v1.8.8 and v1.9.3 and that were overridden in your root **templates** folder and/or in your **my-website-theme** folder:
+
+    
+    webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=my-website-theme
 
 ## Contributing
 
@@ -72,35 +93,6 @@ To be able to setup a plugin's database, remember to configure you database cred
     vendor/bin/phpspec run
     ```
 
-  - Behat (non-JS scenarios)
-
-    ```bash
-    vendor/bin/behat --strict --tags="~@javascript"
-    ```
-
-  - Behat (JS scenarios)
-
-    1. [Install Symfony CLI command](https://symfony.com/download).
-
-    2. Start Headless Chrome:
-
-      ```bash
-      google-chrome-stable --enable-automation --disable-background-networking --no-default-browser-check --no-first-run --disable-popup-blocking --disable-default-apps --allow-insecure-localhost --disable-translate --disable-extensions --no-sandbox --enable-features=Metal --headless --remote-debugging-port=9222 --window-size=2880,1800 --proxy-server='direct://' --proxy-bypass-list='*' http://127.0.0.1
-      ```
-
-    3. Install SSL certificates (only once needed) and run test application's webserver on `127.0.0.1:8080`:
-
-      ```bash
-      symfony server:ca:install
-      APP_ENV=test symfony server:start --port=8080 --dir=tests/Application/public --daemon
-      ```
-
-    4. Run Behat:
-
-      ```bash
-      vendor/bin/behat --strict --tags="@javascript"
-      ```
-
   - Static Analysis
 
     - Psalm
@@ -112,29 +104,13 @@ To be able to setup a plugin's database, remember to configure you database cred
     - PHPStan
 
       ```bash
-      vendor/bin/phpstan analyse -c phpstan.neon -l max src/
+      vendor/bin/phpstan analyse
       ```
 
   - Coding Standard
 
     ```bash
-    vendor/bin/ecs check src
-    ```
-
-### Opening Sylius with your plugin
-
-- Using `test` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=test bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=test bin/console server:run -d public)
-    ```
-
-- Using `dev` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=dev bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=dev bin/console server:run -d public)
+    vendor/bin/ecs check
     ```
 
 ## License
