@@ -56,13 +56,15 @@ There are two optional parameters:
 
 * List of templates that changed between Sylius v1.8.4 and v1.8.8 and that were overridden in your root **templates** folder:
 
-    
+    ```bash
     webgriffe:upgrade:template-changes v1.8.4 v1.8.8
+    ```
 
 * List of templates that changed between Sylius v1.8.8 and v1.9.3 and that were overridden in your root **templates** folder and/or in your **my-website-theme** folder:
 
-    
+    ```bash
     webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=my-website-theme
+    ```
 
 ## Contributing
 
