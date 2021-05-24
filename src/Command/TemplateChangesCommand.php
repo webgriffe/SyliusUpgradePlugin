@@ -168,7 +168,7 @@ final class TemplateChangesCommand extends Command
     {
         $files = Glob::glob($targetDir . 'Sylius*Bundle' . \DIRECTORY_SEPARATOR . '**' . \DIRECTORY_SEPARATOR . '*.html.twig');
 
-        // from /Users/user/workspace/project/templates/bundles/SyliusAdminBundle/PaymentMethod/_form.html.twig
+        // from /path_to_project/templates/bundles/SyliusAdminBundle/PaymentMethod/_form.html.twig
         // to SyliusAdminBundle/PaymentMethod/_form.html.twig
         return array_map(
             static function (string $file) use ($targetDir): string {
@@ -214,7 +214,7 @@ final class TemplateChangesCommand extends Command
     {
         $files = Glob::glob($targetDir . 'Sylius*Bundle' . \DIRECTORY_SEPARATOR . '**' . \DIRECTORY_SEPARATOR . '*.html.twig');
 
-        // from /Users/luke/workspace/project/themes/my-theme/SyliusAdminBundle/views/PaymentMethod/_form.html.twig
+        // from /path_to_project/themes/my-theme/SyliusAdminBundle/views/PaymentMethod/_form.html.twig
         // to SyliusAdminBundle/PaymentMethod/_form.html.twig
         return array_map(
             static function (string $file) use ($targetDir): string {
