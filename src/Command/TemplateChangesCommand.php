@@ -88,13 +88,13 @@ final class TemplateChangesCommand extends Command
             throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::TO_VERSION_ARGUMENT_NAME));
         }
 
-        $themeName = $input->getOption(self::THEME_OPTION_NAME);
-        $legacyMode = (bool) $input->getOption(self::LEGACY_MODE_OPTION_NAME);
-
         $versionChangedFiles = $this->getFilesChangedBetweenTwoVersions($fromVersion, $toVersion);
         $this->computeTemplateFilesChangedAndOverridden($versionChangedFiles);
 
+        /** @var mixed $themeName */
+        $themeName = $input->getOption(self::THEME_OPTION_NAME);
         if ($themeName !== null && is_string($themeName)) {
+            $legacyMode = (bool) $input->getOption(self::LEGACY_MODE_OPTION_NAME);
             $this->computeThemeTemplateFilesChangedAndOverridden($versionChangedFiles, $themeName, $legacyMode);
         }
 
