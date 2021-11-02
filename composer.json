@@ -10,7 +10,8 @@
         "webmozart/glob": "^4.3"
     },
     "conflict": {
-        "api-platform/core": "^2.6"
+        "api-platform/core": "^2.6",
+        "doctrine/dbal": "^3"
     },
     "require-dev": {
         "behat/behat": "^3.6.1",
