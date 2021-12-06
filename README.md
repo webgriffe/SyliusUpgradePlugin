@@ -41,7 +41,7 @@ All features are implemented as **console commands**.
 
 ### Template changes
 
-    webgriffe:upgrade:template-changes <from-version> <to-version> [--theme=YOUR_THEME] [--legacy] 
+    bin/console webgriffe:upgrade:template-changes <from-version> <to-version> [--theme=YOUR_THEME] [--legacy] 
 
 Print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that has been overridden in your project: in root "templates" folder and/or in a custom theme.
 
@@ -57,13 +57,13 @@ There are two optional parameters:
 * List of templates that changed between Sylius v1.8.4 and v1.8.8 and that were overridden in your root **templates** folder:
 
     ```bash
-    webgriffe:upgrade:template-changes v1.8.4 v1.8.8
+    bin/console webgriffe:upgrade:template-changes v1.8.4 v1.8.8
     ```
 
 * List of templates that changed between Sylius v1.8.8 and v1.9.3 and that were overridden in your root **templates** folder and/or in your **my-website-theme** folder:
 
     ```bash
-    webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=my-website-theme
+    bin/console webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=my-website-theme
     ```
 
 ## Contributing
