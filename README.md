@@ -27,7 +27,7 @@
 
 ## Installation
 
-1. Run `composer require --dev webgriffe/sylius-upgrade-plugin ^0.1.0`
+1. Run `composer require --dev webgriffe/sylius-upgrade-plugin ^0.2.0`
 
 2. Add the plugin to the `config/bundles.php` file:
 
