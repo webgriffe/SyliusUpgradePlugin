@@ -157,7 +157,12 @@ final class TemplateChangesCommand extends Command
 
         $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
         foreach ($overriddenTemplateFiles as $file) {
-            $this->writeLine("\t" . $file);
+            $checkFilesHistoryUrl = $this->getCheckFilesHistoryUrlFromBundleFilePath($file);
+            $this->writeLine("\t" . sprintf(
+                '%s [Check file\'s history: %s]',
+                $file,
+                $checkFilesHistoryUrl
+            ));
         }
     }
 
@@ -203,7 +208,12 @@ final class TemplateChangesCommand extends Command
 
         $this->writeLine(sprintf('Found %s files that changed and was overridden:', count($overriddenTemplateFiles)));
         foreach ($overriddenTemplateFiles as $file) {
-            $this->writeLine("\t" . $file);
+            $checkFilesHistoryUrl = $this->getCheckFilesHistoryUrlFromBundleFilePath($file);
+            $this->writeLine("\t" . sprintf(
+                '%s [Check file\'s history: %s]',
+                $file,
+                $checkFilesHistoryUrl
+            ));
         }
     }
 
@@ -230,5 +240,22 @@ final class TemplateChangesCommand extends Command
             return;
         }
         $this->output->writeln($message);
+    }
+
+    private function getFilePathWithBundle(string $file): string
+    {
+        if (false === $pos = strpos($file, '/')) {
+            return $file;
+        }
+        $bundle = substr($file, 0, $pos);
+        $file = substr($file, $pos + 1);
+        $bundle = str_replace('Sylius', '', $bundle);
+
+        return $bundle . '/Resources/views/' . $file;
+    }
+
+    private function getCheckFilesHistoryUrlFromBundleFilePath(string $file): string
+    {
+        return 'https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/' . $this->getFilePathWithBundle($file);
     }
 }
