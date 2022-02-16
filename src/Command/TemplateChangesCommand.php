@@ -35,6 +35,10 @@ final class TemplateChangesCommand extends Command
     /** @var GitInterface */
     private $gitClient;
 
+    private string $toVersion;
+
+    private string $fromVersion;
+
     public function __construct(GitInterface $gitClient, string $rootPath, string $name = null)
     {
         parent::__construct($name);
@@ -82,13 +86,15 @@ final class TemplateChangesCommand extends Command
         if (!is_string($fromVersion) || trim($fromVersion) === '') {
             throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::FROM_VERSION_ARGUMENT_NAME));
         }
+        $this->fromVersion = $fromVersion;
 
         $toVersion = $input->getArgument(self::TO_VERSION_ARGUMENT_NAME);
         if (!is_string($toVersion) || trim($toVersion) === '') {
             throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::TO_VERSION_ARGUMENT_NAME));
         }
+        $this->toVersion = $toVersion;
 
-        $versionChangedFiles = $this->getFilesChangedBetweenTwoVersions($fromVersion, $toVersion);
+        $versionChangedFiles = $this->getFilesChangedBetweenTwoVersions();
         $this->computeTemplateFilesChangedAndOverridden($versionChangedFiles);
 
         /** @var mixed $themeName */
@@ -104,10 +110,10 @@ final class TemplateChangesCommand extends Command
     /**
      * @return string[]
      */
-    private function getFilesChangedBetweenTwoVersions(string $fromVersion, string $toVersion): array
+    private function getFilesChangedBetweenTwoVersions(): array
     {
-        $this->writeLine(sprintf('Computing differences between %s and %s', $fromVersion, $toVersion));
-        $diff = $this->gitClient->getDiffBetweenTags($fromVersion, $toVersion);
+        $this->writeLine(sprintf('Computing differences between %s and %s', $this->fromVersion, $this->toVersion));
+        $diff = $this->gitClient->getDiffBetweenTags($this->fromVersion, $this->toVersion);
         $versionChangedFiles = [];
         $diffLines = explode(\PHP_EOL, $diff);
         foreach ($diffLines as $diffLine) {
@@ -256,6 +262,6 @@ final class TemplateChangesCommand extends Command
 
     private function getCheckFilesHistoryUrlFromBundleFilePath(string $file): string
     {
-        return 'https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/' . $this->getFilePathWithBundle($file);
+        return 'https://github.com/Sylius/Sylius/commits/' . $this->toVersion . '/src/Sylius/Bundle/' . $this->getFilePathWithBundle($file);
     }
 }
