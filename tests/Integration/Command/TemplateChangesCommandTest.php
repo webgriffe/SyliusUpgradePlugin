@@ -88,8 +88,8 @@ Computing differences between 1.8.4 and 1.8.8
 
 Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
 Found 2 files that changed and was overridden:
-	SyliusShopBundle/Checkout/Address/_form.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/Address/_form.html.twig]
-	SyliusUiBundle/Form/theme.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig]
+	SyliusShopBundle/Checkout/Address/_form.html.twig [Check file's history]
+	SyliusUiBundle/Form/theme.html.twig [Check file's history]
 
 TXT;
 
@@ -123,9 +123,9 @@ Found 0 files that changed and was overridden.
 
 Searching "vfs://root/themes/my-theme/" for overridden files that changed between the two versions.
 Found 3 files that changed and was overridden:
-	SyliusShopBundle/Checkout/_header.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/_header.html.twig]
-	SyliusUiBundle/Form/theme.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig]
-	SyliusAdminBundle/Product/_mainImage.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/AdminBundle/Resources/views/Product/_mainImage.html.twig]
+	SyliusShopBundle/Checkout/_header.html.twig [Check file's history]
+	SyliusUiBundle/Form/theme.html.twig [Check file's history]
+	SyliusAdminBundle/Product/_mainImage.html.twig [Check file's history]
 
 TXT;
 
@@ -212,8 +212,8 @@ Found 0 files that changed and was overridden.
 
 Searching "vfs://root/themes/my-theme/templates/bundles/" for overridden files that changed between the two versions.
 Found 2 files that changed and was overridden:
-	SyliusShopBundle/Checkout/_header.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/ShopBundle/Resources/views/Checkout/_header.html.twig]
-	SyliusUiBundle/Form/theme.html.twig [Check file's history: https://github.com/Sylius/Sylius/commits/master/src/Sylius/Bundle/UiBundle/Resources/views/Form/theme.html.twig]
+	SyliusShopBundle/Checkout/_header.html.twig [Check file's history]
+	SyliusUiBundle/Form/theme.html.twig [Check file's history]
 
 TXT;
 

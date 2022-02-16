@@ -159,7 +159,7 @@ final class TemplateChangesCommand extends Command
         foreach ($overriddenTemplateFiles as $file) {
             $checkFilesHistoryUrl = $this->getCheckFilesHistoryUrlFromBundleFilePath($file);
             $this->writeLine("\t" . sprintf(
-                '%s [Check file\'s history: %s]',
+                '%s [<href=%s>Check file\'s history</>]',
                 $file,
                 $checkFilesHistoryUrl
             ));
@@ -210,7 +210,7 @@ final class TemplateChangesCommand extends Command
         foreach ($overriddenTemplateFiles as $file) {
             $checkFilesHistoryUrl = $this->getCheckFilesHistoryUrlFromBundleFilePath($file);
             $this->writeLine("\t" . sprintf(
-                '%s [Check file\'s history: %s]',
+                '%s [<href=%s>Check file\'s history</>]',
                 $file,
                 $checkFilesHistoryUrl
             ));
