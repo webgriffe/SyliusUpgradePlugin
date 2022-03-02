@@ -35,8 +35,10 @@ final class TemplateChangesCommand extends Command
     /** @var GitInterface */
     private $gitClient;
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $toVersion;
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $fromVersion;
 
     public function __construct(GitInterface $gitClient, string $rootPath, string $name = null)
