@@ -69,7 +69,7 @@ final class TemplateChangesCommand extends Command
             ->addOption(
                 self::THEME_OPTION_NAME,
                 't',
-                InputOption::VALUE_REQUIRED,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Name of the theme for which check the templates that changed.'
             )
             ->addOption(
@@ -99,11 +99,19 @@ final class TemplateChangesCommand extends Command
         $versionChangedFiles = $this->getFilesChangedBetweenTwoVersions();
         $this->computeTemplateFilesChangedAndOverridden($versionChangedFiles);
 
-        /** @var mixed $themeName */
-        $themeName = $input->getOption(self::THEME_OPTION_NAME);
-        if ($themeName !== null && is_string($themeName)) {
-            $legacyMode = (bool) $input->getOption(self::LEGACY_MODE_OPTION_NAME);
-            $this->computeThemeTemplateFilesChangedAndOverridden($versionChangedFiles, $themeName, $legacyMode);
+        /** @var mixed $themesNames */
+        $themesNames = $input->getOption(self::THEME_OPTION_NAME);
+        if (is_string($themesNames)) {
+            $themesNames = [$themesNames];
+        }
+        if (is_array($themesNames)) {
+            foreach ($themesNames as $themeName) {
+                if (!is_string($themeName) || $themeName === '') {
+                    continue;
+                }
+                $legacyMode = (bool) $input->getOption(self::LEGACY_MODE_OPTION_NAME);
+                $this->computeThemeTemplateFilesChangedAndOverridden($versionChangedFiles, $themeName, $legacyMode);
+            }
         }
 
         return 0;

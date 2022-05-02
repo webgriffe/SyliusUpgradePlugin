@@ -219,4 +219,42 @@ TXT;
 
         self::assertEquals($expectedOutput, $output);
     }
+
+    /**
+     * @test
+     */
+    public function it_outputs_filepaths_of_overridden_template_files_for_multiple_theme_folders(): void
+    {
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+
+        $return = $this->commandTester->execute(
+            [
+                TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
+                TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => ['my-theme', 'my-other-theme'],
+            ]
+        );
+
+        self::assertEquals(0, $return);
+        $output = $this->commandTester->getDisplay();
+        $expectedOutput = <<<TXT
+Computing differences between 1.8.4 and 1.8.8
+
+Searching "vfs://root/templates/bundles/" for overridden files that changed between the two versions.
+Found 0 files that changed and was overridden.
+
+Searching "vfs://root/themes/my-theme/templates/bundles/" for overridden files that changed between the two versions.
+Found 2 files that changed and was overridden:
+	SyliusShopBundle/Checkout/_header.html.twig [Check file's history]
+	SyliusUiBundle/Form/theme.html.twig [Check file's history]
+
+Searching "vfs://root/themes/my-other-theme/templates/bundles/" for overridden files that changed between the two versions.
+Found 1 files that changed and was overridden:
+	SyliusUiBundle/Form/theme.html.twig [Check file's history]
+
+TXT;
+
+        self::assertEquals($expectedOutput, $output);
+    }
 }
