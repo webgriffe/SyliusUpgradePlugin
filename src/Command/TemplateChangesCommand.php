@@ -201,7 +201,7 @@ final class TemplateChangesCommand extends Command
 
     private function computeThemeTemplateFilesChangedAndOverridden(array $versionChangedFiles, string $themeName, bool $legacyMode): void
     {
-        $targetDir = $this->rootPath . 'themes' . \DIRECTORY_SEPARATOR . $themeName . \DIRECTORY_SEPARATOR;
+        $targetDir = $this->rootPath . $themeName . \DIRECTORY_SEPARATOR;
         if (!$legacyMode) {
             $targetDir .= self::TEMPLATES_BUNDLES_SUBDIR;
         }
