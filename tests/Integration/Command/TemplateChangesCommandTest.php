@@ -108,7 +108,7 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
                 '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
             ]
         );
@@ -147,7 +147,7 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
                 '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
             ]
         );
@@ -165,7 +165,7 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme',
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
                 '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
             ]
         );
@@ -198,7 +198,7 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'my-theme'
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme'
             ]
         );
 
@@ -232,7 +232,7 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => ['my-theme', 'my-other-theme'],
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => ['themes/my-theme', 'themes/my-other-theme'],
             ]
         );
 
