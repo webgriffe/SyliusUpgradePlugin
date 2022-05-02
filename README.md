@@ -48,7 +48,7 @@ Print a list of template files (with extension .html.twig) that changed between 
 You have to specify both the versions **from** and **to** you want to compute the changes.
 
 There are two optional parameters:
-* **--theme=YOUR_THEME**, specify the theme folder in which to search for changed files;
+* **--theme=YOUR_THEME**, specify the theme folder in which to search for changed files. You can specify multiple themes by repeating the **--theme** parameter, see the related example in the proper section;
 * **--legacy**, use legacy theme folder structure. From v2.0 of the [SyliusThemeBundle](https://github.com/Sylius/SyliusThemeBundle/) the theme folder structure has changed. The old structure has been deprecated and will be removed in v3.0 as stated [here](https://github.com/Sylius/SyliusThemeBundle/blob/master/UPGRADE.md#upgrade-from-1x-to-20). 
 
 
@@ -64,6 +64,12 @@ There are two optional parameters:
 
     ```bash
     bin/console webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=my-website-theme
+    ```
+
+* Like the previous example, but it searches both themes **my-website-theme** and **my-other-theme** folder:
+
+    ```bash
+    bin/console webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=my-website-theme --theme=my-other-theme
     ```
 
 ## Contributing
