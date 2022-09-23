@@ -8,8 +8,8 @@
   "description": "Helps you upgrade your Sylius app to a new version.",
   "license": "MIT",
   "require": {
-    "php": "^7.4 || ^8.0",
-    "sylius/sylius": "^1.9",
+    "php": "^8.0",
+    "sylius/sylius": "1.11",
     "webmozart/glob": "^4.3"
   },
   "require-dev": {
