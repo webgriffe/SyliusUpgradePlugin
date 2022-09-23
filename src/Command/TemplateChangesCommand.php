@@ -55,30 +55,31 @@ final class TemplateChangesCommand extends Command
         $this
             ->setDescription(
                 'Print a list of template files (with extension .html.twig) that changed between two given Sylius versions ' .
-                'and that has been overridden in the project (in "templates" dir or in a theme).'
+                'and that has been overridden in the project (in "templates" dir or in a theme).',
             )
             ->addArgument(
                 self::FROM_VERSION_ARGUMENT_NAME,
                 InputArgument::REQUIRED,
-                'Starting Sylius version to use for changes computation.'
+                'Starting Sylius version to use for changes computation.',
             )
             ->addArgument(
                 self::TO_VERSION_ARGUMENT_NAME,
                 InputArgument::REQUIRED,
-                'Target Sylius version to use for changes computation.'
+                'Target Sylius version to use for changes computation.',
             )
             ->addOption(
                 self::THEME_OPTION_NAME,
                 't',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                'Name of the theme for which check the templates that changed.'
+                'Name of the theme for which check the templates that changed.',
             )
             ->addOption(
                 self::LEGACY_MODE_OPTION_NAME,
                 'l',
                 InputOption::VALUE_NONE,
-                'Use legacy mode for theme bundle paths: from version 2.0 of the SyliusThemeBundle the theme structure has changed. More info here: https://github.com/Sylius/SyliusThemeBundle/blob/master/UPGRADE.md#upgrade-from-1x-to-20'
-            );
+                'Use legacy mode for theme bundle paths: from version 2.0 of the SyliusThemeBundle the theme structure has changed. More info here: https://github.com/Sylius/SyliusThemeBundle/blob/master/UPGRADE.md#upgrade-from-1x-to-20',
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -151,10 +152,10 @@ final class TemplateChangesCommand extends Command
                         'Sylius',
                         '',
                     ],
-                    $versionChangedFile
+                    $versionChangedFile,
                 );
             },
-            $versionChangedFiles
+            $versionChangedFiles,
         );
     }
 
@@ -178,7 +179,7 @@ final class TemplateChangesCommand extends Command
             $this->writeLine("\t" . sprintf(
                 '%s [<href=%s>Check file\'s history</>]',
                 $file,
-                $checkFilesHistoryUrl
+                $checkFilesHistoryUrl,
             ));
         }
     }
@@ -196,7 +197,7 @@ final class TemplateChangesCommand extends Command
             static function (string $file) use ($targetDir): string {
                 return str_replace($targetDir, '', $file);
             },
-            $files
+            $files,
         );
     }
 
@@ -229,7 +230,7 @@ final class TemplateChangesCommand extends Command
             $this->writeLine("\t" . sprintf(
                 '%s [<href=%s>Check file\'s history</>]',
                 $file,
-                $checkFilesHistoryUrl
+                $checkFilesHistoryUrl,
             ));
         }
     }
@@ -247,7 +248,7 @@ final class TemplateChangesCommand extends Command
             static function (string $file) use ($targetDir): string {
                 return str_replace([$targetDir, DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR], ['', DIRECTORY_SEPARATOR], $file);
             },
-            $files
+            $files,
         );
     }
 
