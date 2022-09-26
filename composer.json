@@ -9,7 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
-        "sylius/sylius": "^1.11.2",
+        "sylius/sylius": "^1.11.2 || ^1.12.0-alpha.1",
         "webmozart/glob": "^4.3"
     },
     "require-dev": {
@@ -41,6 +41,7 @@
         "symfony/dotenv": "^5.4",
         "symfony/intl": "^5.4",
         "symfony/web-profiler-bundle": "^5.4",
+        "symfony/webpack-encore-bundle": "^1.15",
         "vimeo/psalm": "4.7.1",
         "polishsymfonycommunity/symfony-mocker-container": "^1.0"
     },
