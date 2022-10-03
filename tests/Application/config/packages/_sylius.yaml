@@ -15,4 +15,4 @@ sylius_shop:
         include_all_descendants: true
 
 sylius_api:
-    enabled: true
+    enabled: false
