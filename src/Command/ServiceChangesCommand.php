@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace Webgriffe\SyliusUpgradePlugin\Command;
 
 use App\DependencyInjection\Compiler\DecoratorServicePass;
 use App\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass;
@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseD
 use Symfony\Component\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass as BaseRemoveUnusedDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-final class ServicesChangesCommand extends Command
+final class ServiceChangesCommand extends Command
 {
     use BuildDebugContainerTrait;
 
