@@ -6,5 +6,11 @@
             <argument type="string">%kernel.project_dir%</argument>
             <tag name="console.command" />
         </service>
+
+        <service id="webgriffe_sylius_upgrade.command.service_changes" class="Webgriffe\SyliusUpgradePlugin\Command\ServiceChangesCommand">
+            <argument type="service" id="webgriffe_sylius_upgrade.client.git" />
+            <argument type="string">%kernel.project_dir%</argument>
+            <tag name="console.command" />
+        </service>
     </services>
 </container>
