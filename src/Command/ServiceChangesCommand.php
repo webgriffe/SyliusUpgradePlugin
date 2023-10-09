@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Webgriffe\SyliusUpgradePlugin\Command;
 
-use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Command\BuildDebugContainerTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,6 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseDecoratorServicePass;
 use Symfony\Component\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass as BaseRemoveUnusedDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Tests\Webgriffe\SyliusUpgradePlugin\Application\Kernel;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\DecoratorServicePass;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass;
@@ -22,6 +22,10 @@ final class ServiceChangesCommand extends Command
     public const FROM_VERSION_ARGUMENT_NAME = 'from';
 
     public const TO_VERSION_ARGUMENT_NAME = 'to';
+
+    public const NAMESPACE_PREFIX_OPTION_NAME = 'namespace-prefix';
+
+    public const ALIAS_PREFIX_OPTION_NAME = 'alias-prefix';
 
     use BuildDebugContainerTrait;
 
@@ -34,6 +38,10 @@ final class ServiceChangesCommand extends Command
 
     /** @psalm-suppress PropertyNotSetInConstructor */
     private string $fromVersion;
+
+    private string $namespacePrefix;
+
+    private string $aliasPrefix;
 
     public function __construct(private GitInterface $gitClient, string $name = null)
     {
@@ -55,6 +63,20 @@ final class ServiceChangesCommand extends Command
                 self::TO_VERSION_ARGUMENT_NAME,
                 InputArgument::REQUIRED,
                 'Target Sylius version to use for changes computation.',
+            )
+            ->addOption(
+                self::NAMESPACE_PREFIX_OPTION_NAME,
+                'np',
+                InputArgument::OPTIONAL,
+                'The first part of the namespace of your app services, like "App" in "App\Calculator\PriceCalculator". Default: "App".',
+                'App',
+            )
+            ->addOption(
+                self::ALIAS_PREFIX_OPTION_NAME,
+                'ap',
+                InputArgument::OPTIONAL,
+                'The first part of the alias of your app services, like "app" in "app.calculator.price". Default: "app".',
+                'App',
             );
     }
 
@@ -88,7 +110,10 @@ final class ServiceChangesCommand extends Command
             $decoratedDef = $decoratedDefintions[$alias] ?? null;
 
             // if the service is an "App" service, seek for the original Sylius service in the decorated definitions
-            if ($decoratedDef && (str_starts_with($alias, 'App\\') || str_starts_with($alias, 'app.'))) {
+            if ($decoratedDef &&
+                (str_starts_with($alias, sprintf('%s\\', $this->namespacePrefix)) ||
+                    str_starts_with($alias, sprintf('%s.', $this->aliasPrefix)))
+            ) {
                 $decoratedServiceId = $decoratedDef['id'];
                 if (str_starts_with($decoratedServiceId, 'sylius.') ||
                     str_starts_with($decoratedServiceId, 'Sylius\\') ||
@@ -125,8 +150,8 @@ final class ServiceChangesCommand extends Command
             }
 
             // the new service must be an "App" service
-            if (!str_starts_with($definitionClass, 'App\\')) {
-                // this internal service class could have been replaced with an App class even though the original service alias is still untouched
+            if (!str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix))) {
+                // this internal service class could have been replaced with an "App" class even though the original service alias is still untouched
 
                 // todo: search in $decoratedDefintions by alias?
                 $decoratedDef = $decoratedDefintions[$definitionClass]['definition'] ?? null;
@@ -135,7 +160,7 @@ final class ServiceChangesCommand extends Command
                 }
 
                 $decoratedDefClass = $decoratedDef->getClass();
-                if (!str_starts_with($decoratedDefClass, 'App\\') || !class_exists($decoratedDefClass)) {
+                if (!str_starts_with($decoratedDefClass, sprintf('%s\\', $this->namespacePrefix)) || !class_exists($decoratedDefClass)) {
                     continue;
                 }
 
@@ -290,5 +315,17 @@ final class ServiceChangesCommand extends Command
             throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::TO_VERSION_ARGUMENT_NAME));
         }
         $this->toVersion = $toVersion;
+
+        $namespacePrefix = $input->getOption(self::NAMESPACE_PREFIX_OPTION_NAME);
+        if (!is_string($namespacePrefix) || trim($namespacePrefix) === '') {
+            throw new \RuntimeException(sprintf('Option "%s" is not a valid non-empty string', self::NAMESPACE_PREFIX_OPTION_NAME));
+        }
+        $this->namespacePrefix = $namespacePrefix;
+
+        $aliasPrefix = $input->getOption(self::ALIAS_PREFIX_OPTION_NAME);
+        if (!is_string($aliasPrefix) || trim($aliasPrefix) === '') {
+            throw new \RuntimeException(sprintf('Option "%s" is not a valid non-empty string', self::NAMESPACE_PREFIX_OPTION_NAME));
+        }
+        $this->aliasPrefix = $aliasPrefix;
     }
 }
