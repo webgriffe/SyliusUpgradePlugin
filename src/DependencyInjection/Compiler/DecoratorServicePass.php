@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DependencyInjection\Compiler;
+namespace Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\AbstractRecursivePass;
@@ -58,7 +58,7 @@ class DecoratorServicePass extends AbstractRecursivePass
                 $alias = $container->getAlias($inner);
                 $public = $alias->isPublic();
                 $container->setAlias($renamedId, new Alias((string) $alias, false));
-                $decoratedDefinition = $container->findDefinition($alias);
+                $decoratedDefinition = $container->findDefinition((string) $alias);
             } elseif ($container->hasDefinition($inner)) {
                 $decoratedDefinition = $container->getDefinition($inner);
                 $public = $decoratedDefinition->isPublic();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DependencyInjection\Compiler;
+namespace Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\AbstractRecursivePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
