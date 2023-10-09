@@ -37,31 +37,38 @@ final class ServicesChangesCommand extends Command
         $this->compile($rawContainerBuilder, $removeUnusedDefinitionsPass, $decoratorServiceDefinitionsPass);
         $rawKernel->boot();
 
-        // todo: with this association we can search the diff for the classpath with psr4 logic and determine if some of these decorated services
-        // changed or not
-
         $decoratedServicesAssociation = [];
         $decoratedDefintions = $decoratorServiceDefinitionsPass::$decoratedServices;
 
-        // todo: repositories don't seem to be in removedDefinitions
-//        $removedDefinitions = $removeUnusedDefinitionsPass::$removedDefinitions;
-//        foreach ($removedDefinitions as $key => $definition) {
-//            if (str_contains(strtolower($key), 'app') || str_contains(strtolower($key), 'sylius')) {
-//                $output->writeln(sprintf('Found service "%s"', $key));
-//            }
-//        }
+        $output->writeln("\n\n### DEBUG: Computing decorated services");
 
         $rawDefinitions = $rawContainerBuilder->getDefinitions();
         foreach ($rawDefinitions as $alias => $definition) {
-            // todo: Check that it is an "App" service? And not maybe a third party plugin service
+            $decoratedDef = $decoratedDefintions[$alias] ?? null;
 
-            if (str_contains(strtolower($alias), 'province_naming_provider')) {
-                $output->writeln(sprintf('### Found service "%s"', $alias));
+            // if the service is an "App" service, seek for the original Sylius service in the decorated definitions
+            if ($decoratedDef && (str_starts_with($alias, 'App\\') || str_starts_with($alias, 'app.'))) {
+                $decoratedServiceId = $decoratedDef['id'];
+                if (str_starts_with($decoratedServiceId, 'sylius.') ||
+                    str_starts_with($decoratedServiceId, 'Sylius\\') ||
+                    str_starts_with($decoratedServiceId, '\\Sylius\\')) {
+                    $class = $decoratedDef['definition']?->getClass();
+                    if ($class !== null && class_exists($class)) {
+                        $decoratedServicesAssociation[$alias] = $class;
+                        $output->writeln(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
+                        $output->writeln(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
+
+                        continue;
+                    }
+                }
             }
 
-            // the replaced service must be a "Sylius" service
-            // todo: or an App service: you can find it's definition in the $decoratedDefintions array
-            if (!(str_starts_with($alias, 'sylius.') || str_starts_with($alias, 'Sylius\\') || str_starts_with($alias, '\\Sylius\\'))) {
+
+            // otherwise, the replaced service must be a "Sylius" service
+            if (!(str_starts_with($alias, 'sylius.') ||
+                str_starts_with($alias, 'Sylius\\') ||
+                str_starts_with($alias, '\\Sylius\\'))
+            ) {
                 continue;
             }
 
@@ -73,8 +80,6 @@ final class ServicesChangesCommand extends Command
             $aliasNormalized = strtolower($alias);
             // ignore repositories and controllers 'cause they are magically registered
             if (str_contains($aliasNormalized, 'repository') || str_contains($aliasNormalized, 'controller')) {
-                $output->writeln(sprintf('Repository or controller service "%s"', $alias));
-
                 continue;
             }
 
@@ -144,20 +149,11 @@ final class ServicesChangesCommand extends Command
                 }
             }
 
-//                    $innerServiceId = $definition->innerServiceId;
-//                    if ($innerServiceId !== null) {
-//                        $innerService = $removedDefinitions[$innerServiceId] ?? null;
-//                        if ($innerService instanceof Definition) {
-//                            $replacedServices[$alias] = $definition;
-//                            $output->writeln("\tFound");
-//                        }
-//                    }
-//
-//                    continue;
-
             $output->writeln(sprintf("\tNot found classpath for alias %s", $alias));
         }
 
+
+        $output->writeln("\n\n### Computing changed services");
         $diff = @file_get_contents('https://github.com/Sylius/Sylius/compare/v1.11.0..v1.12.0.diff');
         file_put_contents('diff.txt', $diff);
         $diffLines = explode(\PHP_EOL, $diff);
@@ -179,7 +175,8 @@ final class ServicesChangesCommand extends Command
                 }
                 $output->writeln(
                     sprintf(
-                        'Service "%s" must be checked because the service that it decorates "%s" has changed in these versions',
+//                        'Service "%s" must be checked because the service that it decorates "%s" has changed in these versions',
+                        "\t%s | %s",
                         $newService,
                         $oldService,
                     ),
