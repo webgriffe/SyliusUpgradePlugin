@@ -21,8 +21,12 @@ final class ServicesChangesCommand extends Command
 
     protected static $defaultName = 'app:process:services-changes';
 
+    private OutputInterface $output;
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->output = $output;
+
         /** @var Kernel $rawKernel */
         $rawKernel = $this->getApplication()->getKernel();
         $buildContainer = \Closure::bind(function () {
@@ -40,7 +44,7 @@ final class ServicesChangesCommand extends Command
         $decoratedServicesAssociation = [];
         $decoratedDefintions = $decoratorServiceDefinitionsPass::$decoratedServices;
 
-        $output->writeln("\n\n### DEBUG: Computing decorated services");
+        $this->outputVerbose("\n\n### DEBUG: Computing decorated services");
 
         $rawDefinitions = $rawContainerBuilder->getDefinitions();
         foreach ($rawDefinitions as $alias => $definition) {
@@ -55,8 +59,8 @@ final class ServicesChangesCommand extends Command
                     $class = $decoratedDef['definition']?->getClass();
                     if ($class !== null && class_exists($class)) {
                         $decoratedServicesAssociation[$alias] = $class;
-                        $output->writeln(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
-                        $output->writeln(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
+                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
+                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
 
                         continue;
                     }
@@ -99,16 +103,22 @@ final class ServicesChangesCommand extends Command
                 }
 
                 $decoratedServicesAssociation[$definitionClass] = $decoratedDefClass;
-                $output->writeln(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
-                $output->writeln(sprintf("\tFound classpath by 'decorated definitions' %s", $decoratedDefClass));
+                if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                    $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' %s", $decoratedDefClass));
+                }
 
                 continue;
             }
 
-            $output->writeln(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+            }
             if (class_exists($alias)) {
                 $decoratedServicesAssociation[$definitionClass] = $alias;
-                $output->writeln(sprintf("\tFound classpath by alias %s", $alias));
+                if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                    $this->outputVerbose(sprintf("\tFound classpath by alias %s", $alias));
+                }
 
                 continue;
             }
@@ -118,7 +128,7 @@ final class ServicesChangesCommand extends Command
                 $class = $decoratedDefintion['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
-                    $output->writeln(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
+                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
 
                     continue;
                 }
@@ -128,7 +138,7 @@ final class ServicesChangesCommand extends Command
                 $class = str_replace('Interface', '', $alias);
                 if (class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
-                    $output->writeln(sprintf("\tFound classpath with 'Interface substitution' %s", $class));
+                    $this->outputVerbose(sprintf("\tFound classpath with 'Interface substitution' %s", $class));
 
                     continue;
                 }
@@ -142,18 +152,18 @@ final class ServicesChangesCommand extends Command
                     $class = $decoratedDefintion['definition']?->getClass();
                     if ($class !== null && class_exists($class)) {
                         $decoratedServicesAssociation[$definitionClass] = $class;
-                        $output->writeln(sprintf("\tFound classpath with '.inner substitution' %s", $class));
+                        $this->outputVerbose(sprintf("\tFound classpath with '.inner substitution' %s", $class));
 
                         continue;
                     }
                 }
             }
 
-            $output->writeln(sprintf("\tNot found classpath for alias %s", $alias));
+            $this->outputVerbose(sprintf("\tNot found classpath for alias %s", $alias));
         }
 
 
-        $output->writeln("\n\n### Computing changed services");
+        $this->outputVerbose("\n\n### Computing changed services");
         $diff = @file_get_contents('https://github.com/Sylius/Sylius/compare/v1.11.0..v1.12.0.diff');
         file_put_contents('diff.txt', $diff);
         $diffLines = explode(\PHP_EOL, $diff);
@@ -175,8 +185,7 @@ final class ServicesChangesCommand extends Command
                 }
                 $output->writeln(
                     sprintf(
-//                        'Service "%s" must be checked because the service that it decorates "%s" has changed in these versions',
-                        "\t%s | %s",
+                        'Service "%s" must be checked because the service that it decorates "%s" has changed between given versions',
                         $newService,
                         $oldService,
                     ),
@@ -206,5 +215,12 @@ final class ServicesChangesCommand extends Command
         }
 
         $compiler->getServiceReferenceGraph()->clear();
+    }
+
+    private function outputVerbose(string $message): void
+    {
+        if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->output->writeln($message);
+        }
     }
 }
