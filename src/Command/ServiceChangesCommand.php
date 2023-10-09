@@ -9,23 +9,59 @@ use App\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass;
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Command\BuildDebugContainerTrait;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseDecoratorServicePass;
 use Symfony\Component\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass as BaseRemoveUnusedDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 
 final class ServiceChangesCommand extends Command
 {
+    public const FROM_VERSION_ARGUMENT_NAME = 'from';
+
+    public const TO_VERSION_ARGUMENT_NAME = 'to';
+
     use BuildDebugContainerTrait;
 
-    protected static $defaultName = 'app:process:services-changes';
+    protected static $defaultName = 'webgriffe:upgrade:service-changes';
 
     private OutputInterface $output;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
+    private string $toVersion;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
+    private string $fromVersion;
+
+    public function __construct(private GitInterface $gitClient, string $name = null)
+    {
+        parent::__construct($name);
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->setDescription(
+                'Print the list of your services that decorates or replaces a service that changed between two given Sylius versions.',
+            )
+            ->addArgument(
+                self::FROM_VERSION_ARGUMENT_NAME,
+                InputArgument::REQUIRED,
+                'Starting Sylius version to use for changes computation.',
+            )
+            ->addArgument(
+                self::TO_VERSION_ARGUMENT_NAME,
+                InputArgument::REQUIRED,
+                'Target Sylius version to use for changes computation.',
+            );
+    }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
+        $this->loadInputs($input);
 
         /** @var Kernel $rawKernel */
         $rawKernel = $this->getApplication()->getKernel();
@@ -36,6 +72,7 @@ final class ServiceChangesCommand extends Command
         }, $rawKernel, \get_class($rawKernel));
         /** @var ContainerBuilder $rawContainerBuilder */
         $rawContainerBuilder = $buildContainer();
+        // todo: this is not used, remove?
         $removeUnusedDefinitionsPass = new RemoveUnusedDefinitionsPass();
         $decoratorServiceDefinitionsPass = new DecoratorServicePass();
         $this->compile($rawContainerBuilder, $removeUnusedDefinitionsPass, $decoratorServiceDefinitionsPass);
@@ -164,23 +201,12 @@ final class ServiceChangesCommand extends Command
 
 
         $this->outputVerbose("\n\n### Computing changed services");
-        $diff = @file_get_contents('https://github.com/Sylius/Sylius/compare/v1.11.0..v1.12.0.diff');
-        file_put_contents('diff.txt', $diff);
-        $diffLines = explode(\PHP_EOL, $diff);
-        foreach ($diffLines as $diffLine) {
-            if (strpos($diffLine, 'diff --git') !== 0) {
-                continue;
-            }
-            $diffLineParts = explode(' ', $diffLine);
-            $changedFileName = substr($diffLineParts[2], 2);
-
-            if (!str_starts_with($changedFileName, 'src/')) {
-                continue;
-            }
-
+        $this->output->writeln(sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion));
+        $filesChanged = $this->getFilesChangedBetweenTwoVersions();
+        foreach ($filesChanged as $fileChanged) {
             foreach ($decoratedServicesAssociation as $newService => $oldService) {
                 $pathFromNamespace = str_replace('\\', \DIRECTORY_SEPARATOR, $oldService);
-                if (!str_contains($changedFileName, $pathFromNamespace)) {
+                if (!str_contains($fileChanged, $pathFromNamespace)) {
                     continue;
                 }
                 $output->writeln(
@@ -196,8 +222,35 @@ final class ServiceChangesCommand extends Command
         return 0;
     }
 
-    private function compile(ContainerBuilder $rawContainerBuilder, RemoveUnusedDefinitionsPass $removeUnusedDefinitionsPass, DecoratorServicePass $decoratorServiceDefinitionsPass): void
+    /**
+     * @return string[]
+     */
+    private function getFilesChangedBetweenTwoVersions(): array
     {
+        $diff = $this->gitClient->getDiffBetweenTags($this->fromVersion, $this->toVersion);
+        $versionChangedFiles = [];
+        $diffLines = explode(\PHP_EOL, $diff);
+        foreach ($diffLines as $diffLine) {
+            if (strpos($diffLine, 'diff --git') !== 0) {
+                continue;
+            }
+            $diffLineParts = explode(' ', $diffLine);
+            $changedFileName = substr($diffLineParts[2], 2);
+
+            if (!str_starts_with($changedFileName, 'src/')) {
+                continue;
+            }
+            $versionChangedFiles[] = $changedFileName;
+        }
+
+        return $versionChangedFiles;
+    }
+
+    private function compile(
+        ContainerBuilder $rawContainerBuilder,
+        RemoveUnusedDefinitionsPass $removeUnusedDefinitionsPass,
+        DecoratorServicePass $decoratorServiceDefinitionsPass
+    ): void {
         $compiler = $rawContainerBuilder->getCompiler();
 
         foreach ($rawContainerBuilder->getCompilerPassConfig()->getPasses() as $pass) {
@@ -222,5 +275,20 @@ final class ServiceChangesCommand extends Command
         if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->output->writeln($message);
         }
+    }
+
+    private function loadInputs(InputInterface $input): void
+    {
+        $fromVersion = $input->getArgument(self::FROM_VERSION_ARGUMENT_NAME);
+        if (!is_string($fromVersion) || trim($fromVersion) === '') {
+            throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::FROM_VERSION_ARGUMENT_NAME));
+        }
+        $this->fromVersion = $fromVersion;
+
+        $toVersion = $input->getArgument(self::TO_VERSION_ARGUMENT_NAME);
+        if (!is_string($toVersion) || trim($toVersion) === '') {
+            throw new \RuntimeException(sprintf('Argument "%s" is not a valid non-empty string', self::TO_VERSION_ARGUMENT_NAME));
+        }
+        $this->toVersion = $toVersion;
     }
 }
