@@ -16,3 +16,8 @@ services:
             - '@webgriffe_sylius_upgrade.client.git'
             - 'vfs://root'
         tags: { name: "console.command" }
+
+    ## ServiceChangesCommandTest ##
+    webgriffe_sylius_upgrade.service_changes_command.directly_decorated_service:
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DirectlyDecoratedService
+        decorates: 'Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManagerInterface'
