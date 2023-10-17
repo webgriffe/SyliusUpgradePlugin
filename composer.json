@@ -9,7 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
-        "sylius/sylius": "^1.11.2 || ^1.12.0-alpha.1",
+        "sylius/sylius": "^1.11.2 || ^1.12",
         "webmozart/glob": "^4.3"
     },
     "require-dev": {
