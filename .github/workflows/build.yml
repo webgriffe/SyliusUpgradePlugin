@@ -183,7 +183,7 @@ jobs:
         name: Roave BC Check
         runs-on: ubuntu-latest
         env:
-            PHP_VERSION: 8.0
+            PHP_VERSION: 8.1
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v2
