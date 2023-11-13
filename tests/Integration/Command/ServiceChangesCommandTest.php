@@ -28,7 +28,11 @@ final class ServiceChangesCommandTest extends KernelTestCase
 
     protected function tearDown(): void
     {
+        try {
+            parent::tearDown();
+        } catch (\Throwable) { // the kernel was already shut down, so we catch the error here to avoid a red test
 
+        }
     }
 
     public function test_it_detects_changed_decorated_services(): void
