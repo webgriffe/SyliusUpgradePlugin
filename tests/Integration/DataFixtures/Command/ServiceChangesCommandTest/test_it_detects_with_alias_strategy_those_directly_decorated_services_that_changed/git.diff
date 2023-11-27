@@ -1,0 +1,14 @@
+diff --git a/src/Sylius/Bundle/ApiBundle/CommandHandler/Checkout/SendOrderConfirmationHandler.php b/src/Sylius/Bundle/ApiBundle/CommandHandler/Checkout/SendOrderConfirmationHandler.php
+index 4eaff957874..60d2decf5e8 100644
+--- a/src/Sylius/Bundle/ApiBundle/CommandHandler/Checkout/SendOrderConfirmationHandler.php
++++ b/src/Sylius/Bundle/ApiBundle/CommandHandler/Checkout/SendOrderConfirmationHandler.php
+
+diff --git a/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php b/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php
+index 5270cc23123..02f6b26fcf7 100644
+--- a/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php
++++ b/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php
+
+diff --git a/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php b/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php
+index 7e2cfde7545..da90d9fd52c 100644
+--- a/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php
++++ b/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php

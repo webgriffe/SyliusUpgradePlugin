@@ -41,3 +41,38 @@ services:
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_directly_decorated_services_that_changed.decorate_customer_unique_address_adder:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_directly_decorated_services_that_changed\DecorateCustomerUniqueAddressAdder
         decorates: sylius.customer_unique_address_adder
+
+
+    ## test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed
+    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed.decorate_province_naming_provider:
+        public: true
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed\DecorateProvinceNamingProvider
+        decorates: sylius.province_naming_provider
+        arguments:
+            - '@.inner'
+
+    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed.decorate_order_payment_processor:
+        public: true
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed\DecorateOrderPaymentProcessor
+        decorates: sylius.order_processing.order_payment_processor.after_checkout
+        decoration_priority: 100
+        arguments:
+            - '@.inner'
+
+    # decorated BUT not changed
+    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed.decorate_customer_order_addresses_saver:
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed\DecorateCustomerOrderAddressesSaver
+        decorates: sylius.customer_order_addresses_saver
+        arguments:
+            - '@.inner'
+
+
+    ## test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed
+    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed.decorate_send_order_confirmation:
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed\DecorateSendOrderConfirmationHandler
+        decorates: Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler
+
+    # decorated BUT not changed
+    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed.decorate_send_shipment_confirmation_email_handler:
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed\DecorateSendShipmentConfirmationEmailHandler
+        decorates: Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendShipmentConfirmationEmailHandler
