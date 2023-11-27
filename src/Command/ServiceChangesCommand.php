@@ -196,15 +196,16 @@ final class ServiceChangesCommand extends Command
                 }
             }
 
-            if (str_ends_with($alias, 'Interface')) {
-                $class = str_replace('Interface', '', $alias);
-                if (class_exists($class)) {
-                    $decoratedServicesAssociation[$definitionClass] = $class;
-                    $this->outputVerbose(sprintf("\tFound classpath with 'Interface substitution' %s", $class));
-
-                    continue;
-                }
-            }
+            // todo: this is not applying a valid logic actually
+//            if (str_ends_with($alias, 'Interface')) {
+//                $class = str_replace('Interface', '', $alias);
+//                if (class_exists($class)) {
+//                    $decoratedServicesAssociation[$definitionClass] = $class;
+//                    $this->outputVerbose(sprintf("\tFound classpath with 'Interface substitution' %s", $class));
+//
+//                    continue;
+//                }
+//            }
 
             $innerServiceId = $definition->innerServiceId;
             if ($innerServiceId !== null && str_contains($innerServiceId, '.inner')) {
