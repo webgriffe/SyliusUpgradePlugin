@@ -122,7 +122,7 @@ final class ServiceChangesCommand extends Command
                     if ($class !== null && class_exists($class)) {
                         $decoratedServicesAssociation[$alias] = $class;
                         $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
-                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
+                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
 
                         continue;
                     }
@@ -167,7 +167,7 @@ final class ServiceChangesCommand extends Command
                 $decoratedServicesAssociation[$definitionClass] = $decoratedDefClass;
                 if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                     $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
-                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' %s", $decoratedDefClass));
+                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $decoratedDefClass));
                 }
 
                 continue;
@@ -179,7 +179,7 @@ final class ServiceChangesCommand extends Command
             if (class_exists($alias)) {
                 $decoratedServicesAssociation[$definitionClass] = $alias;
                 if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $this->outputVerbose(sprintf("\tFound classpath by alias %s", $alias));
+                    $this->outputVerbose(sprintf("\tFound classpath by 'alias' strategy: %s", $alias));
                 }
 
                 continue;
@@ -190,7 +190,7 @@ final class ServiceChangesCommand extends Command
                 $class = $decoratedDefintion['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
-                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' %s", $class));
+                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
 
                     continue;
                 }
@@ -201,7 +201,7 @@ final class ServiceChangesCommand extends Command
 //                $class = str_replace('Interface', '', $alias);
 //                if (class_exists($class)) {
 //                    $decoratedServicesAssociation[$definitionClass] = $class;
-//                    $this->outputVerbose(sprintf("\tFound classpath with 'Interface substitution' %s", $class));
+//                    $this->outputVerbose(sprintf("\tFound classpath by 'Interface substitution' strategy: %s", $class));
 //
 //                    continue;
 //                }
@@ -215,7 +215,7 @@ final class ServiceChangesCommand extends Command
                     $class = $decoratedDefintion['definition']?->getClass();
                     if ($class !== null && class_exists($class)) {
                         $decoratedServicesAssociation[$definitionClass] = $class;
-                        $this->outputVerbose(sprintf("\tFound classpath with '.inner substitution' %s", $class));
+                        $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
 
                         continue;
                     }
