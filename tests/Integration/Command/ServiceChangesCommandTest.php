@@ -35,7 +35,7 @@ final class ServiceChangesCommandTest extends KernelTestCase
         }
     }
 
-    public function test_it_detects_directly_decorated_services_that_changed(): void
+    public function test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
 
@@ -53,15 +53,15 @@ final class ServiceChangesCommandTest extends KernelTestCase
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
-Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_directly_decorated_services_that_changed\DecorateOrderEmailManagerInterface" must be checked because the service that it decorates "Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManager" has changed between given versions
-Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_directly_decorated_services_that_changed\DecorateNewShopBased" must be checked because the service that it decorates "Sylius\Component\Core\Cart\Context\ShopBasedCartContext" has changed between given versions
+Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateOrderEmailManagerInterface" must be checked because the service that it decorates "Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManager" has changed between given versions
+Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateNewShopBased" must be checked because the service that it decorates "Sylius\Component\Core\Cart\Context\ShopBasedCartContext" has changed between given versions
 
 TXT;
 
         self::assertEquals($expectedOutput, $output);
     }
 
-    public function test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed(): void
+    public function test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
 
@@ -79,15 +79,15 @@ TXT;
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
-Service "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed.decorate_province_naming_provider" must be checked because the service that it decorates "Sylius\Component\Addressing\Provider\ProvinceNamingProvider" has changed between given versions
-Service "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_directly_decorated_services_that_changed.decorate_order_payment_processor" must be checked because the service that it decorates "Sylius\Component\Core\OrderProcessing\OrderPaymentProcessor" has changed between given versions
+Service "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_province_naming_provider" must be checked because the service that it decorates "Sylius\Component\Addressing\Provider\ProvinceNamingProvider" has changed between given versions
+Service "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_order_payment_processor" must be checked because the service that it decorates "Sylius\Component\Core\OrderProcessing\OrderPaymentProcessor" has changed between given versions
 
 TXT;
 
         self::assertEquals($expectedOutput, $output);
     }
 
-    public function test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed(): void
+    public function test_it_detects_with_alias_strategy_those_decorated_services_that_changed(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
 
@@ -105,7 +105,7 @@ TXT;
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
-Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_alias_strategy_those_directly_decorated_services_that_changed\DecorateSendOrderConfirmationHandler" must be checked because the service that it decorates "Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler" has changed between given versions
+Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendOrderConfirmationHandler" must be checked because the service that it decorates "Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler" has changed between given versions
 
 TXT;
 
