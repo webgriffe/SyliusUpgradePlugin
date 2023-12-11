@@ -43,6 +43,7 @@ services:
         decorates: sylius.customer_unique_address_adder
 
 
+
     ## test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_province_naming_provider:
         public: true
@@ -65,6 +66,7 @@ services:
         decorates: sylius.customer_order_addresses_saver
         arguments:
             - '@.inner'
+
 
 
     ## test_it_detects_with_alias_strategy_those_decorated_services_that_changed

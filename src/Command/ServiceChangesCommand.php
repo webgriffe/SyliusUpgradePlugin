@@ -138,22 +138,21 @@ final class ServiceChangesCommand extends Command
                 continue;
             }
 
-            $definitionClass = $definition->getClass();
-            if (!is_string($definitionClass)) {
-                continue;
-            }
-
             $aliasNormalized = strtolower($alias);
             // ignore repositories and controllers 'cause they are magically registered
             if (str_contains($aliasNormalized, 'repository') || str_contains($aliasNormalized, 'controller')) {
                 continue;
             }
 
-            // the new service must be an "App" service
-            if (!str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix))) {
-                // this internal service class could have been replaced with an "App" class even though the original service alias is still untouched
+            $definitionClass = $definition->getClass();
+            if (!is_string($definitionClass)) {
+                continue;
+            }
 
-                // todo: search in $decoratedDefintions by alias?
+            if (!str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix))) {
+                // it could happen that the definition class of the decorating service is an "App" class,
+                // but it still be defined with original service class and alias..
+                // todo: i cannot find a way to test this case
                 $decoratedDef = $decoratedDefintions[$definitionClass]['definition'] ?? null;
                 if (!$decoratedDef) {
                     continue;
