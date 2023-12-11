@@ -111,4 +111,29 @@ TXT;
 
         self::assertEquals($expectedOutput, $output);
     }
+
+    public function test_it_ignores_those_decorated_services_that_changed_but_the_decoration_services_are_not_within_the_given_namespace(): void
+    {
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
+
+        $result = $this->commandTester->execute(
+            [
+                ServiceChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.11.0',
+                ServiceChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.12.0',
+                '--' . ServiceChangesCommand::NAMESPACE_PREFIX_OPTION_NAME => 'OtherVendorTests',
+                '--' . ServiceChangesCommand::ALIAS_PREFIX_OPTION_NAME => 'other_vendor',
+            ],
+        );
+
+        self::assertEquals(0, $result);
+
+        $output = $this->commandTester->getDisplay();
+        $expectedOutput = <<<TXT
+Computing modified services between 1.11.0 and 1.12.0
+No changes detected
+
+TXT;
+
+        self::assertEquals($expectedOutput, $output);
+    }
 }

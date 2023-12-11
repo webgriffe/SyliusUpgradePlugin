@@ -229,12 +229,14 @@ final class ServiceChangesCommand extends Command
         $this->outputVerbose("\n\n### Computing changed services");
         $this->output->writeln(sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion));
         $filesChanged = $this->getFilesChangedBetweenTwoVersions();
+        $atLeastOneChanged = false;
         foreach ($filesChanged as $fileChanged) {
             foreach ($decoratedServicesAssociation as $newService => $oldService) {
                 $pathFromNamespace = str_replace('\\', \DIRECTORY_SEPARATOR, $oldService);
                 if (!str_contains($fileChanged, $pathFromNamespace)) {
                     continue;
                 }
+                $atLeastOneChanged = true;
                 $output->writeln(
                     sprintf(
                         'Service "%s" must be checked because the service that it decorates "%s" has changed between given versions',
@@ -243,6 +245,10 @@ final class ServiceChangesCommand extends Command
                     ),
                 );
             }
+        }
+
+        if (!$atLeastOneChanged) {
+            $this->output->writeln('No changes detected');
         }
 
         return 0;
