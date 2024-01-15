@@ -141,6 +141,7 @@ final class ServiceChangesCommand extends Command
             $aliasNormalized = strtolower($alias);
             // ignore repositories and controllers 'cause they are magically registered
             if (str_contains($aliasNormalized, 'repository') || str_contains($aliasNormalized, 'controller')) {
+                // todo: do not know if it's possible to handle this case
                 continue;
             }
 
@@ -186,10 +187,13 @@ final class ServiceChangesCommand extends Command
 
             $decoratedDefintion = $decoratedDefintions[$alias] ?? null;
             if ($decoratedDefintion) {
+                // todo: this is not tested yet
                 $class = $decoratedDefintion['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
-                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
+                    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
+                    }
 
                     continue;
                 }
@@ -214,7 +218,9 @@ final class ServiceChangesCommand extends Command
                     $class = $decoratedDefintion['definition']?->getClass();
                     if ($class !== null && class_exists($class)) {
                         $decoratedServicesAssociation[$definitionClass] = $class;
-                        $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
+                        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                            $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
+                        }
 
                         continue;
                     }
