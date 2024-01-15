@@ -101,6 +101,7 @@ final class ServiceChangesCommand extends Command
         $rawKernel->boot();
 
         $decoratedServicesAssociation = [];
+        $syliusServicesWithAppClass = [];
         $decoratedDefintions = $decoratorServiceDefinitionsPass::$decoratedServices;
 
         $this->outputVerbose("\n\n### DEBUG: Computing decorated services");
@@ -150,7 +151,8 @@ final class ServiceChangesCommand extends Command
                 continue;
             }
 
-            if (!str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix))) {
+            $isAppClass = str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix));
+            if (!$isAppClass) {
                 // it could happen that the definition class of the decorating service is an "App" class,
                 // but it still be defined with original service class and alias..
                 // todo: i cannot find a way to test this case
@@ -227,7 +229,9 @@ final class ServiceChangesCommand extends Command
                 }
             }
 
-            $this->outputVerbose(sprintf("\tNot found classpath for alias %s", $alias));
+            if (class_exists($definitionClass)) {
+                $syliusServicesWithAppClass[$alias] = $definitionClass;
+            }
         }
 
 
@@ -254,6 +258,17 @@ final class ServiceChangesCommand extends Command
 
         if (!$atLeastOneChanged) {
             $this->output->writeln('No changes detected');
+        }
+
+        foreach ($syliusServicesWithAppClass as $alias => $class) {
+            $output->writeln(
+                sprintf(
+                    'Service with class "%s" must be checked manually because the related alias "%s" referes to a' .
+                    ' Sylius service. Actually it\'s impossible to detects if the original class chnaged between versions.',
+                    $class,
+                    $alias,
+                ),
+            );
         }
 
         return 0;
