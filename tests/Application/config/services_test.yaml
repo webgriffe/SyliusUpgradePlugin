@@ -78,3 +78,10 @@ services:
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_decorated_services_that_changed.decorate_send_shipment_confirmation_email_handler:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendShipmentConfirmationEmailHandler
         decorates: Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendShipmentConfirmationEmailHandler
+
+
+    ## test_it_alerts_about_services_whose_class_has_changed_but_not_their_alias
+    # this
+    sylius.calculator.product_variant_price:
+        public: true
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DecorateProductVariantPriceCalculator
