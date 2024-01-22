@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseDecoratorServicePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Tests\Webgriffe\SyliusUpgradePlugin\Application\Kernel;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\DecoratorServicePass;
@@ -103,32 +104,13 @@ final class ServiceChangesCommand extends Command
 
         $this->outputVerbose("\n\n### DEBUG: Computing decorated services");
 
+        /** @var array<string, Definition> $rawDefinitions */
         $rawDefinitions = $rawContainerBuilder->getDefinitions();
         foreach ($rawDefinitions as $alias => $definition) {
-            $decoratedDef = $decoratedDefintions[$alias] ?? null;
-
-            // if the service is an "App" service, seek for the original Sylius service in the decorated definitions
-            if ($decoratedDef &&
-                (str_starts_with($alias, sprintf('%s\\', $this->namespacePrefix)) ||
-                    str_starts_with($alias, sprintf('%s.', $this->aliasPrefix)))
-            ) {
-                $decoratedServiceId = $decoratedDef['id'];
-                if (str_starts_with($decoratedServiceId, 'sylius.') ||
-                    str_starts_with($decoratedServiceId, 'Sylius\\') ||
-                    str_starts_with($decoratedServiceId, '\\Sylius\\')) {
-                    $class = $decoratedDef['definition']?->getClass();
-                    if ($class !== null && class_exists($class)) {
-                        $decoratedServicesAssociation[$alias] = $class;
-                        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                            $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
-                            $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
-                        }
-
-                        continue;
-                    }
-                }
+            $decoratedDefintion = $decoratedDefintions[$alias] ?? null;
+            if ($this->applyDecoratedDefinitionsStrategy($decoratedServicesAssociation, $alias, $decoratedDefintion)) {
+                continue;
             }
-
 
             // otherwise, the replaced service must be a "Sylius" service
             if (!(str_starts_with($alias, 'sylius.') ||
@@ -152,47 +134,23 @@ final class ServiceChangesCommand extends Command
 
             $isAppClass = str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix));
             if (!$isAppClass) {
-                // it could happen that the definition class of the decorating service is an "App" class,
-                // but it still be defined with original service class and alias..
-                // todo: i cannot find a way to test this case
-                $decoratedDef = $decoratedDefintions[$definitionClass]['definition'] ?? null;
-                if (!$decoratedDef) {
-                    continue;
-                }
-
-                $decoratedDefClass = $decoratedDef->getClass();
-                if (!str_starts_with($decoratedDefClass, sprintf('%s\\', $this->namespacePrefix)) || !class_exists($decoratedDefClass)) {
-                    continue;
-                }
-
-                $decoratedServicesAssociation[$definitionClass] = $decoratedDefClass;
-                if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
-                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $decoratedDefClass));
-                }
+                $this->applyDecoratedDefinitionsNonAppClassStrategy($decoratedServicesAssociation, $alias, $definitionClass);
 
                 continue;
             }
 
-            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
-            }
-            if (class_exists($alias)) {
-                $decoratedServicesAssociation[$definitionClass] = $alias;
-                if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $this->outputVerbose(sprintf("\tFound classpath by 'alias' strategy: %s", $alias));
-                }
-
+            if ($this->applyAliasStrategy($decoratedServicesAssociation, $alias, $definitionClass)) {
                 continue;
             }
 
-            $decoratedDefintion = $decoratedDefintions[$alias] ?? null;
+            // todo: to remove
             if ($decoratedDefintion) {
                 // todo: this is not tested yet
                 $class = $decoratedDefintion['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
                     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $class, $definitionClass));
                         $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
                     }
 
@@ -200,7 +158,7 @@ final class ServiceChangesCommand extends Command
                 }
             }
 
-            // todo: this is not applying a valid logic actually
+            // todo: this is not applying a valid logic actually, remove?
 //            if (str_ends_with($alias, 'Interface')) {
 //                $class = str_replace('Interface', '', $alias);
 //                if (class_exists($class)) {
@@ -211,21 +169,8 @@ final class ServiceChangesCommand extends Command
 //                }
 //            }
 
-            $innerServiceId = $definition->innerServiceId;
-            if ($innerServiceId !== null && str_contains($innerServiceId, '.inner')) {
-                $originalServiceId = str_replace('.inner', '', $innerServiceId);
-                $decoratedDefintion = $decoratedDefintions[$originalServiceId] ?? null;
-                if ($decoratedDefintion) {
-                    $class = $decoratedDefintion['definition']?->getClass();
-                    if ($class !== null && class_exists($class)) {
-                        $decoratedServicesAssociation[$definitionClass] = $class;
-                        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                            $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
-                        }
-
-                        continue;
-                    }
-                }
+            if ($this->applyInnerStrategy($decoratedServicesAssociation, $definition, $decoratedDefintions, $definitionClass)) {
+                continue;
             }
 
             if (class_exists($definitionClass)) {
@@ -347,5 +292,101 @@ final class ServiceChangesCommand extends Command
             throw new \RuntimeException(sprintf('Option "%s" is not a valid non-empty string', self::NAMESPACE_PREFIX_OPTION_NAME));
         }
         $this->aliasPrefix = $aliasPrefix;
+    }
+
+    /**
+     * If the service is an "App" service, seek for the original Sylius service in the decorated definitions
+     */
+    private function applyDecoratedDefinitionsStrategy(
+        array &$decoratedServicesAssociation,
+        string $alias,
+        ?array $decoratedDef = null
+    ): bool {
+        if ($decoratedDef &&
+            (str_starts_with($alias, sprintf('%s\\', $this->namespacePrefix)) ||
+                str_starts_with($alias, sprintf('%s.', $this->aliasPrefix)))
+        ) {
+            $decoratedServiceId = $decoratedDef['id'];
+            if (str_starts_with($decoratedServiceId, 'sylius.') ||
+                str_starts_with($decoratedServiceId, 'Sylius\\') ||
+                str_starts_with($decoratedServiceId, '\\Sylius\\')) {
+                $class = $decoratedDef['definition']?->getClass();
+                if ($class !== null && class_exists($class)) {
+                    $decoratedServicesAssociation[$alias] = $class;
+                    if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
+                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * It could happen that the definition class of the decorating service is an "App" class,
+     * but it still was defined with original service class and alias..
+     */
+    private function applyDecoratedDefinitionsNonAppClassStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass,): bool
+    {
+        // todo: i cannot find a way to test these cases
+        $decoratedDef = $decoratedDefintions[$definitionClass]['definition'] ?? null;
+        if (!$decoratedDef) {
+            return true;
+        }
+
+        $decoratedDefClass = $decoratedDef->getClass();
+        if (!str_starts_with($decoratedDefClass, sprintf('%s\\', $this->namespacePrefix)) || !class_exists($decoratedDefClass)) {
+            return true;
+        }
+
+        $decoratedServicesAssociation[$definitionClass] = $decoratedDefClass;
+        if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+            $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $decoratedDefClass));
+        }
+
+        return true;
+    }
+
+    private function applyAliasStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass,): bool
+    {
+        if (!class_exists($alias)) {
+            return false;
+        }
+
+        $decoratedServicesAssociation[$definitionClass] = $alias;
+        if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+            $this->outputVerbose(sprintf("\tFound classpath by 'alias' strategy: %s", $alias));
+        }
+
+        return true;
+    }
+
+    private function applyInnerStrategy(array &$decoratedServicesAssociation, Definition $definition, array $decoratedDefintions, string $definitionClass): bool
+    {
+        $innerServiceId = $definition->innerServiceId;
+        if ($innerServiceId !== null && str_contains($innerServiceId, '.inner')) {
+            $originalServiceId = str_replace('.inner', '', $innerServiceId);
+            $decoratedDefintion = $decoratedDefintions[$originalServiceId] ?? null;
+            if ($decoratedDefintion) {
+                $class = $decoratedDefintion['definition']?->getClass();
+                if ($class !== null && class_exists($class)) {
+                    $decoratedServicesAssociation[$definitionClass] = $class;
+                    if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $class, $definitionClass));
+                        $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
