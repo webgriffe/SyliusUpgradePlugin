@@ -53,9 +53,13 @@ final class ServiceChangesCommandTest extends KernelTestCase
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
-Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateOrderEmailManagerInterface" must be checked because the service that it decorates "Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManager" has changed between given versions
-Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateNewShopBased" must be checked because the service that it decorates "Sylius\Component\Core\Cart\Context\ShopBasedCartContext" has changed between given versions
-Service with class "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\DecorateProductVariantPriceCalculator" must be checked manually because the related alias "sylius.calculator.product_variant_price" referes to a Sylius service. Actually it's impossible to detects if the original class chnaged between versions.
+
+Found 2 services that changed and were decorated ([decorated service] -> [decorating service]):
+"Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManager" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateOrderEmailManagerInterface"
+"Sylius\Component\Core\Cart\Context\ShopBasedCartContext" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateNewShopBased"
+
+Found 1 services that must be checked manually because the related alias referes to a Sylius service. Actually it's impossible to detects if the original class chnaged between versions. Here is the list ([decorated service] -> [decorating service]):
+"sylius.calculator.product_variant_price" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DecorateProductVariantPriceCalculator"
 
 TXT;
 
@@ -80,9 +84,13 @@ TXT;
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
-Service "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_province_naming_provider" must be checked because the service that it decorates "Sylius\Component\Addressing\Provider\ProvinceNamingProvider" has changed between given versions
-Service "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_order_payment_processor" must be checked because the service that it decorates "Sylius\Component\Core\OrderProcessing\OrderPaymentProcessor" has changed between given versions
-Service with class "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\DecorateProductVariantPriceCalculator" must be checked manually because the related alias "sylius.calculator.product_variant_price" referes to a Sylius service. Actually it's impossible to detects if the original class chnaged between versions.
+
+Found 2 services that changed and were decorated ([decorated service] -> [decorating service]):
+"Sylius\Component\Addressing\Provider\ProvinceNamingProvider" -> "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_province_naming_provider"
+"Sylius\Component\Core\OrderProcessing\OrderPaymentProcessor" -> "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_order_payment_processor"
+
+Found 1 services that must be checked manually because the related alias referes to a Sylius service. Actually it's impossible to detects if the original class chnaged between versions. Here is the list ([decorated service] -> [decorating service]):
+"sylius.calculator.product_variant_price" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DecorateProductVariantPriceCalculator"
 
 TXT;
 
@@ -107,8 +115,12 @@ TXT;
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
-Service "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendOrderConfirmationHandler" must be checked because the service that it decorates "Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler" has changed between given versions
-Service with class "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\DecorateProductVariantPriceCalculator" must be checked manually because the related alias "sylius.calculator.product_variant_price" referes to a Sylius service. Actually it's impossible to detects if the original class chnaged between versions.
+
+Found 1 services that changed and were decorated ([decorated service] -> [decorating service]):
+"Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendOrderConfirmationHandler"
+
+Found 1 services that must be checked manually because the related alias referes to a Sylius service. Actually it's impossible to detects if the original class chnaged between versions. Here is the list ([decorated service] -> [decorating service]):
+"sylius.calculator.product_variant_price" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DecorateProductVariantPriceCalculator"
 
 TXT;
 
@@ -133,6 +145,8 @@ TXT;
         $output = $this->commandTester->getDisplay();
         $expectedOutput = <<<TXT
 Computing modified services between 1.11.0 and 1.12.0
+
+Found 0 services that changed and was decorated.
 No changes detected
 
 TXT;
