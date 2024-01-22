@@ -113,10 +113,7 @@ final class ServiceChangesCommand extends Command
             }
 
             // otherwise, the replaced service must be a "Sylius" service
-            if (!(str_starts_with($alias, 'sylius.') ||
-                str_starts_with($alias, 'Sylius\\') ||
-                str_starts_with($alias, '\\Sylius\\'))
-            ) {
+            if (!($this->isSyliusService($alias))) {
                 continue;
             }
 
@@ -151,7 +148,6 @@ final class ServiceChangesCommand extends Command
                 $syliusServicesWithAppClass[$alias] = $definitionClass;
             }
         }
-
 
         $this->outputVerbose("\n\n### Computing changed services");
         $this->output->writeln(sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion));
@@ -268,6 +264,13 @@ final class ServiceChangesCommand extends Command
         $this->aliasPrefix = $aliasPrefix;
     }
 
+    private function isSyliusService(mixed $decoratedServiceId): bool
+    {
+        return str_starts_with($decoratedServiceId, 'sylius.') ||
+            str_starts_with($decoratedServiceId, 'Sylius\\') ||
+            str_starts_with($decoratedServiceId, '\\Sylius\\');
+    }
+
     /**
      * If the service is an "App" service, seek for the original Sylius service in the decorated definitions
      */
@@ -281,9 +284,7 @@ final class ServiceChangesCommand extends Command
                 str_starts_with($alias, sprintf('%s.', $this->aliasPrefix)))
         ) {
             $decoratedServiceId = $decoratedDef['id'];
-            if (str_starts_with($decoratedServiceId, 'sylius.') ||
-                str_starts_with($decoratedServiceId, 'Sylius\\') ||
-                str_starts_with($decoratedServiceId, '\\Sylius\\')) {
+            if ($this->isSyliusService($decoratedServiceId)) {
                 $class = $decoratedDef['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$alias] = $class;
