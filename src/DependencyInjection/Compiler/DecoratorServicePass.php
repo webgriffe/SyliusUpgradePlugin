@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class DecoratorServicePass extends AbstractRecursivePass
 {
-    /** @var Definition[] */
+    /** @var array[] */
     public static array $decoratedServices = [];
 
     public function process(ContainerBuilder $container)
