@@ -150,18 +150,22 @@ final class ServiceChangesCommand extends Command
         }
 
         if (!($this->computeServicesThatChanged($decoratedServicesAssociation))) {
-            $this->output->writeln('No changes detected');
+            $this->writeLine('No changes detected');
         }
 
-        foreach ($syliusServicesWithAppClass as $alias => $class) {
-            $output->writeln(
+        if (count($syliusServicesWithAppClass) > 0) {
+            $this->writeLine('');
+            $this->writeLine(
                 sprintf(
-                    'Service with class "%s" must be checked manually because the related alias "%s" referes to a' .
-                    ' Sylius service. Actually it\'s impossible to detects if the original class chnaged between versions.',
-                    $class,
-                    $alias,
-                ),
+                    'Found %s services that must be checked manually because the related alias referes to a Sylius' .
+                    ' service. Actually it\'s impossible to detects if the original class chnaged between versions.' .
+                    ' Here is the list ([decorated service] -> [decorating service]):',
+                    count($syliusServicesWithAppClass)
+                )
             );
+            foreach ($syliusServicesWithAppClass as $alias => $class) {
+                $this->writeLine(sprintf('"%s" -> "%s"', $alias, $class));
+            }
         }
 
         return 0;
@@ -169,29 +173,37 @@ final class ServiceChangesCommand extends Command
 
     private function computeServicesThatChanged(array $decoratedServicesAssociation): bool
     {
-        $this->outputVerbose("\n\n### Computing changed services");
-        $this->output->writeln(
+        $this->writeLine(
             sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion)
         );
+        $this->writeLine('');
+
+        $decoratedServices = [];
         $filesChanged = $this->getFilesChangedBetweenTwoVersions();
-        $atLeastOneChanged = false;
         foreach ($filesChanged as $fileChanged) {
             foreach ($decoratedServicesAssociation as $newService => $oldService) {
                 $pathFromNamespace = str_replace('\\', \DIRECTORY_SEPARATOR, $oldService);
                 if (!str_contains($fileChanged, $pathFromNamespace)) {
                     continue;
                 }
-                $atLeastOneChanged = true;
-                $this->output->writeln(
-                    sprintf(
-                        'Service "%s" must be checked because the service that it decorates "%s" has changed between given versions',
-                        $newService,
-                        $oldService,
-                    ),
-                );
+                $decoratedServices[$newService] = $oldService;
             }
         }
-        return $atLeastOneChanged;
+        if (count($decoratedServices) === 0) {
+            $this->writeLine('Found 0 services that changed and was decorated.');
+
+            return false;
+        }
+
+        $this->writeLine(sprintf(
+            'Found %s services that changed and were decorated ([decorated service] -> [decorating service]):',
+            count($decoratedServices)
+        ));
+        foreach ($decoratedServices as $newService => $oldService) {
+            $this->writeLine(sprintf('"%s" -> "%s"', $oldService, $newService));
+        }
+
+        return true;
     }
 
     /**
@@ -239,8 +251,16 @@ final class ServiceChangesCommand extends Command
     private function outputVerbose(string $message): void
     {
         if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->output->writeln($message);
+            $this->writeLine($message);
         }
+    }
+
+    private function writeLine(string $message): void
+    {
+        if ($this->output === null) {
+            return;
+        }
+        $this->output->writeln($message);
     }
 
     private function loadInputs(InputInterface $input): void
