@@ -143,21 +143,6 @@ final class ServiceChangesCommand extends Command
                 continue;
             }
 
-            // todo: to remove
-            if ($decoratedDefintion) {
-                // todo: this is not tested yet
-                $class = $decoratedDefintion['definition']?->getClass();
-                if ($class !== null && class_exists($class)) {
-                    $decoratedServicesAssociation[$definitionClass] = $class;
-                    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $class, $definitionClass));
-                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
-                    }
-
-                    continue;
-                }
-            }
-
             if ($this->applyInnerStrategy($decoratedServicesAssociation, $definition, $decoratedDefintions, $definitionClass)) {
                 continue;
             }
