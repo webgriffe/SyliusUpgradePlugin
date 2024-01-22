@@ -158,17 +158,6 @@ final class ServiceChangesCommand extends Command
                 }
             }
 
-            // todo: this is not applying a valid logic actually, remove?
-//            if (str_ends_with($alias, 'Interface')) {
-//                $class = str_replace('Interface', '', $alias);
-//                if (class_exists($class)) {
-//                    $decoratedServicesAssociation[$definitionClass] = $class;
-//                    $this->outputVerbose(sprintf("\tFound classpath by 'Interface substitution' strategy: %s", $class));
-//
-//                    continue;
-//                }
-//            }
-
             if ($this->applyInnerStrategy($decoratedServicesAssociation, $definition, $decoratedDefintions, $definitionClass)) {
                 continue;
             }
