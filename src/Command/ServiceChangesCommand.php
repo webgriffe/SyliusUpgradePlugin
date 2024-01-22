@@ -10,12 +10,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseDecoratorServicePass;
-use Symfony\Component\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass as BaseRemoveUnusedDefinitionsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Tests\Webgriffe\SyliusUpgradePlugin\Application\Kernel;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\DecoratorServicePass;
-use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\RemoveUnusedDefinitionsPass;
 
 final class ServiceChangesCommand extends Command
 {
@@ -94,10 +92,9 @@ final class ServiceChangesCommand extends Command
         }, $rawKernel, \get_class($rawKernel));
         /** @var ContainerBuilder $rawContainerBuilder */
         $rawContainerBuilder = $buildContainer();
-        // todo: this is not used, remove?
-        $removeUnusedDefinitionsPass = new RemoveUnusedDefinitionsPass();
+
         $decoratorServiceDefinitionsPass = new DecoratorServicePass();
-        $this->compile($rawContainerBuilder, $removeUnusedDefinitionsPass, $decoratorServiceDefinitionsPass);
+        $this->compile($rawContainerBuilder, $decoratorServiceDefinitionsPass);
         $rawKernel->boot();
 
         $decoratedServicesAssociation = [];
@@ -300,17 +297,11 @@ final class ServiceChangesCommand extends Command
 
     private function compile(
         ContainerBuilder $rawContainerBuilder,
-        RemoveUnusedDefinitionsPass $removeUnusedDefinitionsPass,
         DecoratorServicePass $decoratorServiceDefinitionsPass
     ): void {
         $compiler = $rawContainerBuilder->getCompiler();
 
         foreach ($rawContainerBuilder->getCompilerPassConfig()->getPasses() as $pass) {
-            if ($pass instanceof BaseRemoveUnusedDefinitionsPass) {
-                $removeUnusedDefinitionsPass->process($rawContainerBuilder);
-
-                continue;
-            }
             if ($pass instanceof BaseDecoratorServicePass) {
                 $decoratorServiceDefinitionsPass->process($rawContainerBuilder);
 
