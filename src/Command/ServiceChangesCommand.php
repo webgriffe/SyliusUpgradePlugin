@@ -149,28 +149,7 @@ final class ServiceChangesCommand extends Command
             }
         }
 
-        $this->outputVerbose("\n\n### Computing changed services");
-        $this->output->writeln(sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion));
-        $filesChanged = $this->getFilesChangedBetweenTwoVersions();
-        $atLeastOneChanged = false;
-        foreach ($filesChanged as $fileChanged) {
-            foreach ($decoratedServicesAssociation as $newService => $oldService) {
-                $pathFromNamespace = str_replace('\\', \DIRECTORY_SEPARATOR, $oldService);
-                if (!str_contains($fileChanged, $pathFromNamespace)) {
-                    continue;
-                }
-                $atLeastOneChanged = true;
-                $output->writeln(
-                    sprintf(
-                        'Service "%s" must be checked because the service that it decorates "%s" has changed between given versions',
-                        $newService,
-                        $oldService,
-                    ),
-                );
-            }
-        }
-
-        if (!$atLeastOneChanged) {
+        if (!($this->computeServicesThatChanged($decoratedServicesAssociation))) {
             $this->output->writeln('No changes detected');
         }
 
@@ -186,6 +165,33 @@ final class ServiceChangesCommand extends Command
         }
 
         return 0;
+    }
+
+    private function computeServicesThatChanged(array $decoratedServicesAssociation): bool
+    {
+        $this->outputVerbose("\n\n### Computing changed services");
+        $this->output->writeln(
+            sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion)
+        );
+        $filesChanged = $this->getFilesChangedBetweenTwoVersions();
+        $atLeastOneChanged = false;
+        foreach ($filesChanged as $fileChanged) {
+            foreach ($decoratedServicesAssociation as $newService => $oldService) {
+                $pathFromNamespace = str_replace('\\', \DIRECTORY_SEPARATOR, $oldService);
+                if (!str_contains($fileChanged, $pathFromNamespace)) {
+                    continue;
+                }
+                $atLeastOneChanged = true;
+                $this->output->writeln(
+                    sprintf(
+                        'Service "%s" must be checked because the service that it decorates "%s" has changed between given versions',
+                        $newService,
+                        $oldService,
+                    ),
+                );
+            }
+        }
+        return $atLeastOneChanged;
     }
 
     /**
@@ -288,10 +294,8 @@ final class ServiceChangesCommand extends Command
                 $class = $decoratedDef['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$alias] = $class;
-                    if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
-                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
-                    }
+                    $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
+                    $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
 
                     return true;
                 }
@@ -319,10 +323,8 @@ final class ServiceChangesCommand extends Command
         }
 
         $decoratedServicesAssociation[$definitionClass] = $decoratedDefClass;
-        if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
-            $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $decoratedDefClass));
-        }
+        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $decoratedDefClass));
 
         return true;
     }
@@ -334,10 +336,8 @@ final class ServiceChangesCommand extends Command
         }
 
         $decoratedServicesAssociation[$definitionClass] = $alias;
-        if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
-            $this->outputVerbose(sprintf("\tFound classpath by 'alias' strategy: %s", $alias));
-        }
+        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $alias, $definitionClass));
+        $this->outputVerbose(sprintf("\tFound classpath by 'alias' strategy: %s", $alias));
 
         return true;
     }
@@ -352,10 +352,8 @@ final class ServiceChangesCommand extends Command
                 $class = $decoratedDefintion['definition']?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
-                    if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $class, $definitionClass));
-                        $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
-                    }
+                    $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $class, $definitionClass));
+                    $this->outputVerbose(sprintf("\tFound classpath by '.inner substitution' strategy: %s", $class));
 
                     return true;
                 }
