@@ -119,8 +119,10 @@ final class ServiceChangesCommand extends Command
                     $class = $decoratedDef['definition']?->getClass();
                     if ($class !== null && class_exists($class)) {
                         $decoratedServicesAssociation[$alias] = $class;
-                        $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
-                        $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
+                        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                            $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
+                            $this->outputVerbose(sprintf("\tFound classpath by 'decorated definitions' strategy: %s", $class));
+                        }
 
                         continue;
                     }
