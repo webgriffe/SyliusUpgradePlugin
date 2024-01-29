@@ -9,8 +9,17 @@ use Symplify\EasyCodingStandard\ValueObject\Option;
 return static function (ECSConfig $ecsConfig): void {
     $ecsConfig->import('vendor/sylius-labs/coding-standard/ecs.php');
 
+    $params = $ecsConfig->parameters();
+
+    $params->set(Option::PATHS, [
+        'src',
+        'tests/Behat',
+        'tests/Integration',
+        'tests/Stub',
+    ]);
+    $ecsConfig->skip(['src/Kernel.php']);
+
     $ecsConfig->parameters()->set(Option::SKIP, [
         VisibilityRequiredFixer::class => ['*Spec.php'],
-        Option::PATHS, [__DIR__ . '/src']
     ]);
 };
