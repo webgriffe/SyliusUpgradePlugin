@@ -18,5 +18,10 @@
 
         <env name="APP_ENV" value="test"/>
         <env name="SHELL_VERBOSITY" value="-1" />
+
+        <!-- ###+ symfony/framework-bundle ### -->
+        <env name="APP_ENV" value="dev"/>
+        <env name="APP_SECRET" value="bbacba3e3a937f1322cb50a219a398a1"/>
+        <!-- ###- symfony/framework-bundle ### -->
     </php>
 </phpunit>
