@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webgriffe\SyliusUpgradePlugin\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\BuildDebugContainerTrait;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Tests\Webgriffe\SyliusUpgradePlugin\Application\Kernel;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\DecoratorServicePass;
+use Webmozart\Assert\Assert;
 
 final class ServiceChangesCommand extends Command
 {
@@ -30,17 +32,15 @@ final class ServiceChangesCommand extends Command
 
     protected static $defaultName = 'webgriffe:upgrade:service-changes';
 
-    private OutputInterface $output;
+    private ?OutputInterface $output = null;
 
-    /** @psalm-suppress PropertyNotSetInConstructor */
-    private string $toVersion;
+    private ?string $toVersion = null;
 
-    /** @psalm-suppress PropertyNotSetInConstructor */
-    private string $fromVersion;
+    private ?string $fromVersion = null;
 
-    private string $namespacePrefix;
+    private ?string $namespacePrefix = null;
 
-    private string $aliasPrefix;
+    private ?string $aliasPrefix = null;
 
     public function __construct(private GitInterface $gitClient, string $name = null)
     {
@@ -84,12 +84,23 @@ final class ServiceChangesCommand extends Command
         $this->output = $output;
         $this->loadInputs($input);
 
-        /** @var Kernel $rawKernel */
-        $rawKernel = $this->getApplication()->getKernel();
-        $buildContainer = \Closure::bind(function () {
-            $this->initializeBundles();
+        /** @var Application|null $application */
+        $application = $this->getApplication();
+        /** @var Kernel|null $rawKernel */
+        $rawKernel = $application?->getKernel();
+        Assert::isInstanceOf($rawKernel, Kernel::class);
 
-            return $this->buildContainer();
+        /** @var \Closure $buildContainer */
+        $buildContainer = \Closure::bind(function (): ContainerBuilder {
+            /** @psalm-suppress UndefinedMethod */
+            $this->initializeBundles();
+            /**
+             * @var ContainerBuilder $containerBuilder
+             * @psalm-suppress UndefinedMethod
+             */
+            $containerBuilder = $this->buildContainer();
+
+            return $containerBuilder;
         }, $rawKernel, \get_class($rawKernel));
         /** @var ContainerBuilder $rawContainerBuilder */
         $rawContainerBuilder = $buildContainer();
@@ -98,13 +109,13 @@ final class ServiceChangesCommand extends Command
         $this->compile($rawContainerBuilder, $decoratorServiceDefinitionsPass);
         $rawKernel->boot();
 
+        /** @var array<string, string> $decoratedServicesAssociation */
         $decoratedServicesAssociation = [];
         $syliusServicesWithAppClass = [];
         $decoratedDefintions = $decoratorServiceDefinitionsPass::$decoratedServices;
 
         $this->outputVerbose("\n\n### DEBUG: Computing decorated services");
 
-        /** @var array<string, Definition> $rawDefinitions */
         $rawDefinitions = $rawContainerBuilder->getDefinitions();
         foreach ($rawDefinitions as $alias => $definition) {
             $decoratedDefintion = $decoratedDefintions[$alias] ?? null;
@@ -129,9 +140,9 @@ final class ServiceChangesCommand extends Command
                 continue;
             }
 
-            $isAppClass = str_starts_with($definitionClass, sprintf('%s\\', $this->namespacePrefix));
+            $isAppClass = str_starts_with($definitionClass, sprintf('%s\\', $this->getNamespacePrefix()));
             if (!$isAppClass) {
-                $this->applyDecoratedDefinitionsNonAppClassStrategy($decoratedServicesAssociation, $alias, $definitionClass);
+                $this->applyDecoratedDefinitionsNonAppClassStrategy($decoratedServicesAssociation, $decoratedDefintions, $alias, $definitionClass);
 
                 continue;
             }
@@ -171,10 +182,13 @@ final class ServiceChangesCommand extends Command
         return 0;
     }
 
+    /**
+     * @param array<string, string> $decoratedServicesAssociation
+     */
     private function computeServicesThatChanged(array $decoratedServicesAssociation): bool
     {
         $this->writeLine(
-            sprintf('Computing modified services between %s and %s', $this->fromVersion, $this->toVersion)
+            sprintf('Computing modified services between %s and %s', $this->getFromVersion(), $this->getToVersion())
         );
         $this->writeLine('');
 
@@ -211,7 +225,7 @@ final class ServiceChangesCommand extends Command
      */
     private function getFilesChangedBetweenTwoVersions(): array
     {
-        $diff = $this->gitClient->getDiffBetweenTags($this->fromVersion, $this->toVersion);
+        $diff = $this->gitClient->getDiffBetweenTags($this->getFromVersion(), $this->getToVersion());
         $versionChangedFiles = [];
         $diffLines = explode(\PHP_EOL, $diff);
         foreach ($diffLines as $diffLine) {
@@ -250,6 +264,9 @@ final class ServiceChangesCommand extends Command
 
     private function outputVerbose(string $message): void
     {
+        if ($this->output === null) {
+            return;
+        }
         if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $this->writeLine($message);
         }
@@ -290,7 +307,7 @@ final class ServiceChangesCommand extends Command
         $this->aliasPrefix = $aliasPrefix;
     }
 
-    private function isSyliusService(mixed $decoratedServiceId): bool
+    private function isSyliusService(string $decoratedServiceId): bool
     {
         return str_starts_with($decoratedServiceId, 'sylius.') ||
             str_starts_with($decoratedServiceId, 'Sylius\\') ||
@@ -299,19 +316,24 @@ final class ServiceChangesCommand extends Command
 
     /**
      * If the service is an "App" service, seek for the original Sylius service in the decorated definitions
+     *
+     * @param array<string, string> $decoratedServicesAssociation
      */
     private function applyDecoratedDefinitionsStrategy(
         array &$decoratedServicesAssociation,
         string $alias,
         ?array $decoratedDef = null
     ): bool {
-        if ($decoratedDef &&
-            (str_starts_with($alias, sprintf('%s\\', $this->namespacePrefix)) ||
-                str_starts_with($alias, sprintf('%s.', $this->aliasPrefix)))
+        if ($decoratedDef !== null &&
+            (str_starts_with($alias, sprintf('%s\\', $this->getNamespacePrefix())) ||
+                str_starts_with($alias, sprintf('%s.', $this->getAliasPrefix())))
         ) {
+            /** @var string $decoratedServiceId */
             $decoratedServiceId = $decoratedDef['id'];
             if ($this->isSyliusService($decoratedServiceId)) {
-                $class = $decoratedDef['definition']?->getClass();
+                /** @var Definition|null $definition */
+                $definition = $decoratedDef['definition'] ?? null;
+                $class = $definition?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$alias] = $class;
                     $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $decoratedServiceId, $alias));
@@ -328,18 +350,30 @@ final class ServiceChangesCommand extends Command
     /**
      * It could happen that the definition class of the decorating service is an "App" class,
      * but it still was defined with original service class and alias..
+     *
+     * @param array<string, string> $decoratedServicesAssociation
      */
-    private function applyDecoratedDefinitionsNonAppClassStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass,): bool
-    {
+    private function applyDecoratedDefinitionsNonAppClassStrategy(
+        array &$decoratedServicesAssociation,
+        array $decoratedDefintions,
+        string $alias,
+        string $definitionClass,
+    ): bool {
         // todo: i cannot find a way to test these cases
+        /** @var Definition|null $decoratedDef */
         $decoratedDef = $decoratedDefintions[$definitionClass]['definition'] ?? null;
-        if (!$decoratedDef) {
-            return true;
+        if ($decoratedDef === null) {
+            return false;
         }
 
         $decoratedDefClass = $decoratedDef->getClass();
-        if (!str_starts_with($decoratedDefClass, sprintf('%s\\', $this->namespacePrefix)) || !class_exists($decoratedDefClass)) {
-            return true;
+        if ($decoratedDefClass === null) {
+            return false;
+        }
+
+        if (!str_starts_with($decoratedDefClass, sprintf('%s\\', $this->getNamespacePrefix())) ||
+            !class_exists($decoratedDefClass)) {
+            return false;
         }
 
         $decoratedServicesAssociation[$definitionClass] = $decoratedDefClass;
@@ -349,6 +383,9 @@ final class ServiceChangesCommand extends Command
         return true;
     }
 
+    /**
+     * @param array<string, string> $decoratedServicesAssociation
+     */
     private function applyAliasStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass,): bool
     {
         if (!class_exists($alias)) {
@@ -362,14 +399,28 @@ final class ServiceChangesCommand extends Command
         return true;
     }
 
-    private function applyInnerStrategy(array &$decoratedServicesAssociation, Definition $definition, array $decoratedDefintions, string $definitionClass): bool
-    {
+    /**
+     * @param array<string, string> $decoratedServicesAssociation
+     * @param array[] $decoratedDefintions
+     */
+    private function applyInnerStrategy(
+        array &$decoratedServicesAssociation,
+        Definition $definition,
+        array $decoratedDefintions,
+        string $definitionClass
+    ): bool {
+        /**
+         * @var string|null $innerServiceId
+         * @psalm-suppress InternalProperty
+         */
         $innerServiceId = $definition->innerServiceId;
         if ($innerServiceId !== null && str_contains($innerServiceId, '.inner')) {
             $originalServiceId = str_replace('.inner', '', $innerServiceId);
             $decoratedDefintion = $decoratedDefintions[$originalServiceId] ?? null;
-            if ($decoratedDefintion) {
-                $class = $decoratedDefintion['definition']?->getClass();
+            if ($decoratedDefintion !== null) {
+                /** @var Definition|null $definition2 */
+                $definition2 = $decoratedDefintion['definition'];
+                $class = $definition2?->getClass();
                 if ($class !== null && class_exists($class)) {
                     $decoratedServicesAssociation[$definitionClass] = $class;
                     $this->outputVerbose(sprintf('Sylius service "%s" has been replaced with "%s"', $class, $definitionClass));
@@ -381,5 +432,37 @@ final class ServiceChangesCommand extends Command
         }
 
         return false;
+    }
+
+    private function getFromVersion(): string
+    {
+        $value = $this->fromVersion;
+        Assert::notNull($value);
+
+        return $value;
+    }
+
+    private function getToVersion(): string
+    {
+        $value = $this->toVersion;
+        Assert::notNull($value);
+
+        return $value;
+    }
+
+    private function getNamespacePrefix(): string
+    {
+        $value = $this->namespacePrefix;
+        Assert::notNull($value);
+
+        return $value;
+    }
+
+    private function getAliasPrefix(): string
+    {
+        $value = $this->aliasPrefix;
+        Assert::notNull($value);
+
+        return $value;
     }
 }
