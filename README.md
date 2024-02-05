@@ -23,11 +23,11 @@
 ## Requirements
 
 * PHP `^8.0`
-* Sylius `^1.11 || ^1.12`
+* Sylius `^1.11.2 || ^1.12`
 
 ## Installation
 
-1. Run `composer require --dev webgriffe/sylius-upgrade-plugin ^0.6.1`
+1. Run `composer require --dev webgriffe/sylius-upgrade-plugin`
 
 2. Add the plugin to the `config/bundles.php` file:
 
