@@ -8,6 +8,8 @@ parameters:
     excludePaths:
         # Makes PHPStan crash
         - 'src/DependencyInjection/Configuration.php'
+        # Override a Symfony class
+        - 'src/DependencyInjection/Compiler/DecoratorServicePass.php'
 
         # Test dependencies
         - 'tests/Application/app/**.php'
