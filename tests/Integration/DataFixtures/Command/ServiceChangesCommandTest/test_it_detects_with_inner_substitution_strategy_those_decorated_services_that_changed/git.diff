@@ -1,0 +1,24 @@
+diff --git a/src/Sylius/Bundle/AdminBundle/EmailManager/OrderEmailManager.php b/src/Sylius/Bundle/AdminBundle/EmailManager/OrderEmailManager.php
+index 4eaff957874..60d2decf5e8 100644
+--- a/src/Sylius/Bundle/AdminBundle/EmailManager/OrderEmailManager.php
++++ b/src/Sylius/Bundle/AdminBundle/EmailManager/OrderEmailManager.php
+
+diff --git a/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php b/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php
+index 5270cc23123..02f6b26fcf7 100644
+--- a/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php
++++ b/src/Sylius/Bundle/AdminBundle/EmailManager/ShipmentEmailManager.php
+
+diff --git a/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php b/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php
+index 7e2cfde7545..da90d9fd52c 100644
+--- a/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php
++++ b/src/Sylius/Bundle/AdminBundle/Event/OrderShowMenuBuilderEvent.php
+
+diff --git a/src/Sylius/Component/Core/Cart/Context/ShopBasedCartContext.php b/src/Sylius/Component/Core/Cart/Context/ShopBasedCartContext.php
+index 7e2cfde7545..da90d9fd52c 100644
+--- a/src/Sylius/Component/Core/Cart/Context/ShopBasedCartContext.php
++++ b/src/Sylius/Component/Core/Cart/Context/ShopBasedCartContext.php
+
+diff --git a/src/Sylius/Component/Core/Distributor/MinimumPriceDistributor.php b/src/Sylius/Component/Core/Distributor/MinimumPriceDistributor.php
+index 7e2cfde7545..da90d9fd52c 100644
+--- a/src/Sylius/Component/Core/Distributor/MinimumPriceDistributor.php
++++ b/src/Sylius/Component/Core/Distributor/MinimumPriceDistributor.php
