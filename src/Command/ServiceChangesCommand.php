@@ -169,7 +169,7 @@ final class ServiceChangesCommand extends Command
             $this->writeLine(
                 sprintf(
                     'Found %s services that must be checked manually because the related alias referes to a Sylius' .
-                    ' service. Actually it\'s impossible to detects if the original class chnaged between versions.' .
+                    ' service. Actually it\'s impossible to detect if the original class changed between versions.' .
                     ' Here is the list ([decorated service] -> [decorating service]):',
                     count($syliusServicesWithAppClass)
                 )
