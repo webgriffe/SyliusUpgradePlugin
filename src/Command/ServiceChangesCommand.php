@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Webgriffe\SyliusUpgradePlugin\Command;
 
+use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Command\BuildDebugContainerTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,7 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseDecoratorServicePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Tests\Webgriffe\SyliusUpgradePlugin\Application\Kernel;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\DecoratorServicePass;
 use Webmozart\Assert\Assert;
@@ -91,7 +92,7 @@ final class ServiceChangesCommand extends Command
         $application = $this->getApplication();
         /** @var Kernel|null $rawKernel */
         $rawKernel = $application?->getKernel();
-        Assert::isInstanceOf($rawKernel, Kernel::class);
+        Assert::notNull($rawKernel, 'Kernel not found');
 
         /** @var \Closure $buildContainer */
         $buildContainer = \Closure::bind(function (): ContainerBuilder {
