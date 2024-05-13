@@ -8,8 +8,6 @@
 !/public/media/image/.gitignore
 
 /node_modules
-/yarn.lock
-/package-lock.json
 
 ###> symfony/framework-bundle ###
 /.env.*.local
