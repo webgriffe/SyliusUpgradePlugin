@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Webgriffe\SyliusUpgradePlugin\Integration\Command;
 
 use org\bovigo\vfs\vfsStream;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -15,8 +16,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
 {
     private const FIXTURE_DIR = __DIR__ . '/../DataFixtures/Command/TemplateChangesCommandTest/';
 
-    /** @var CommandTester */
-    private $commandTester;
+    private CommandTester $commandTester;
 
     protected function setUp(): void
     {
@@ -24,7 +24,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
         self::bootKernel();
         vfsStream::setup();
 
-        $application = new Application(static::$kernel);
+        $application = new Application(self::$kernel);
         $command = $application->find('webgriffe:upgrade:template-changes');
         $this->commandTester = new CommandTester($command);
     }
@@ -49,7 +49,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
      */
     public function it_throws_when_from_version_argument_is_not_valid(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Argument "from" is not a valid non-empty string');
 
         $this->commandTester->execute([TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '', TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '']);
@@ -60,7 +60,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
      */
     public function it_throws_when_to_version_argument_is_not_valid(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Argument "to" is not a valid non-empty string');
 
         $this->commandTester->execute([TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4', TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '']);
@@ -71,8 +71,8 @@ final class TemplateChangesCommandTest extends KernelTestCase
      */
     public function it_outputs_filepaths_of_overridden_template_files_in_templates_dir_that_changed_between_two_given_versions(): void
     {
-        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
-        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->name() . '/vfs');
 
         $return = $this->commandTester->execute(
             [
@@ -101,8 +101,8 @@ TXT;
      */
     public function it_outputs_filepaths_of_overridden_template_files_in_theme_dir_that_changed_between_two_given_versions(): void
     {
-        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
-        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->name() . '/vfs');
 
         $return = $this->commandTester->execute(
             [
@@ -137,11 +137,11 @@ TXT;
      */
     public function it_outputs_error_message_when_given_theme_name_directory_does_not_exists(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Cannot search "vfs://root/themes/my-theme/" cause it does not exists');
 
-        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
-        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->name() . '/vfs');
 
         $this->commandTester->execute(
             [
@@ -158,8 +158,8 @@ TXT;
      */
     public function it_outputs_proper_messages_when_there_arent_changed_files_in_both_templates_and_theme_dirs(): void
     {
-        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
-        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->name() . '/vfs');
 
         $return = $this->commandTester->execute(
             [
@@ -191,8 +191,8 @@ TXT;
      */
     public function it_outputs_filepaths_of_overridden_template_files_in_theme_dir_that_changed_between_two_given_versions_with_new_theme_bundles_path_location(): void
     {
-        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
-        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->name() . '/vfs');
 
         $return = $this->commandTester->execute(
             [
@@ -225,8 +225,8 @@ TXT;
      */
     public function it_outputs_filepaths_of_overridden_template_files_for_multiple_theme_folders(): void
     {
-        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->getName() . '/git.diff');
-        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->getName() . '/vfs');
+        Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
+        vfsStream::copyFromFileSystem(self::FIXTURE_DIR . $this->name() . '/vfs');
 
         $return = $this->commandTester->execute(
             [
