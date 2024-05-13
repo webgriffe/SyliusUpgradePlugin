@@ -43,7 +43,7 @@ All features are implemented as **console commands**.
 
     bin/console webgriffe:upgrade:template-changes <from-version> <to-version> [--theme=PATH_TO_YOUR_THEME] [--legacy] 
 
-Print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that has been overridden in your project: in root "templates" folder and/or in a custom theme.
+Print a list of template files (with extension .html.twig) that changed between two given Sylius versions and that have been overridden in your project: in root "templates" folder and/or in a custom theme.
 
 You have to specify both the versions **from** and **to** you want to compute the changes.
 
@@ -71,6 +71,34 @@ There are two optional parameters:
     ```bash
     bin/console webgriffe:upgrade:template-changes v1.8.8 v1.9.3 --theme=themes/my-website-theme --theme=themes/my-other-theme --theme=vendor/acme/my-vendor-theme
     ```
+
+### Decorated services changes
+
+    bin/console webgriffe:upgrade:service-changes <from-version> <to-version> [--theme=PATH_TO_YOUR_THEME] [--legacy] 
+
+Print a list of services that changed between two given Sylius versions and that have been decorated/overridden in your project.
+
+You have to specify both the versions **from** and **to** you want to compute the changes.
+
+There are two optional parameters:
+* **--namespace-prefix=NAMESPACE-PREFIX**, the first part of the namespace of your app services, like "App" in "App\Calculator\PriceCalculator". Default: "App".
+* **--alias-prefix=ALIAS-PREFIX**, the first part of the alias of your app services, like "app" in "app.calculator.price". Default: "app".
+
+
+#### Examples
+
+* List of services that changed between Sylius v1.11.0 and v1.13.0 and that were decorated in your project:
+
+    ```bash
+    bin/console webgriffe:upgrade:service-changes v1.11.0 v1.13.0
+    ```
+
+* List of services that changed between Sylius v1.11.0 and v1.13.0 and that were decorated in your project but with custom namespace and alias prefixes:
+
+    ```bash
+    bin/console webgriffe:upgrade:service-changes v1.11.0 v1.13.0 --namespace-prefix="Webgriffe" --alias-prefix="webgriffe"
+    ```
+
 
 ## Contributing
 
