@@ -23,7 +23,7 @@
 ## Requirements
 
 * PHP `^8.0`
-* Sylius `^1.11.2 || ^1.12`
+* Sylius `^1.11.2 || ^1.12 || ^1.13`
 
 ## Installation
 
