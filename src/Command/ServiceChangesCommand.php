@@ -18,6 +18,9 @@ use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webgriffe\SyliusUpgradePlugin\DependencyInjection\Compiler\DecoratorServicePass;
 use Webmozart\Assert\Assert;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 final class ServiceChangesCommand extends Command
 {
     public const FROM_VERSION_ARGUMENT_NAME = 'from';
@@ -410,7 +413,6 @@ final class ServiceChangesCommand extends Command
         string $definitionClass
     ): bool {
         /**
-         * @var string|null $innerServiceId
          * @psalm-suppress InternalProperty
          */
         $innerServiceId = $definition->innerServiceId;
