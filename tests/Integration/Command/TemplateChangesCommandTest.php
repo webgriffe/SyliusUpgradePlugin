@@ -38,7 +38,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-            ]
+            ],
         );
 
         self::assertEquals(0, $return);
@@ -78,7 +78,7 @@ final class TemplateChangesCommandTest extends KernelTestCase
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-            ]
+            ],
         );
 
         self::assertEquals(0, $return);
@@ -110,7 +110,7 @@ TXT;
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
                 '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
                 '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
-            ]
+            ],
         );
 
         self::assertEquals(0, $return);
@@ -149,7 +149,7 @@ TXT;
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
                 '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
                 '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
-            ]
+            ],
         );
     }
 
@@ -167,7 +167,7 @@ TXT;
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
                 '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
                 '--' . TemplateChangesCommand::LEGACY_MODE_OPTION_NAME => true,
-            ]
+            ],
         );
 
         self::assertEquals(0, $return);
@@ -198,8 +198,8 @@ TXT;
             [
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
-                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme'
-            ]
+                '--' . TemplateChangesCommand::THEME_OPTION_NAME => 'themes/my-theme',
+            ],
         );
 
         self::assertEquals(0, $return);
@@ -233,7 +233,7 @@ TXT;
                 TemplateChangesCommand::FROM_VERSION_ARGUMENT_NAME => '1.8.4',
                 TemplateChangesCommand::TO_VERSION_ARGUMENT_NAME => '1.8.8',
                 '--' . TemplateChangesCommand::THEME_OPTION_NAME => ['themes/my-theme', 'themes/my-other-theme'],
-            ]
+            ],
         );
 
         self::assertEquals(0, $return);

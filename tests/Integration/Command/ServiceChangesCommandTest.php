@@ -31,7 +31,6 @@ final class ServiceChangesCommandTest extends KernelTestCase
         try {
             parent::tearDown();
         } catch (\Throwable) { // the kernel was already shut down, so we catch the error here to avoid a red test
-
         }
     }
 

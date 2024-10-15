@@ -7,7 +7,6 @@ namespace Webgriffe\SyliusUpgradePlugin\Command;
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Command\BuildDebugContainerTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -100,6 +99,7 @@ final class ServiceChangesCommand extends Command
             $this->initializeBundles();
             /**
              * @var ContainerBuilder $containerBuilder
+             *
              * @psalm-suppress UndefinedMethod
              */
             $containerBuilder = $this->buildContainer();
@@ -175,8 +175,8 @@ final class ServiceChangesCommand extends Command
                     'Found %s services that must be checked manually because the related alias referes to a Sylius' .
                     ' service. Actually it\'s impossible to detect if the original class changed between versions.' .
                     ' Here is the list ([decorated service] -> [decorating service]):',
-                    count($syliusServicesWithAppClass)
-                )
+                    count($syliusServicesWithAppClass),
+                ),
             );
             foreach ($syliusServicesWithAppClass as $alias => $class) {
                 $this->writeLine(sprintf('"%s" -> "%s"', $alias, $class));
@@ -192,7 +192,7 @@ final class ServiceChangesCommand extends Command
     private function computeServicesThatChanged(array $decoratedServicesAssociation): bool
     {
         $this->writeLine(
-            sprintf('Computing modified services between %s and %s', $this->getFromVersion(), $this->getToVersion())
+            sprintf('Computing modified services between %s and %s', $this->getFromVersion(), $this->getToVersion()),
         );
         $this->writeLine('');
 
@@ -215,7 +215,7 @@ final class ServiceChangesCommand extends Command
 
         $this->writeLine(sprintf(
             'Found %s services that changed and were decorated ([decorated service] -> [decorating service]):',
-            count($decoratedServices)
+            count($decoratedServices),
         ));
         foreach ($decoratedServices as $newService => $oldService) {
             $this->writeLine(sprintf('"%s" -> "%s"', $oldService, $newService));
@@ -250,7 +250,7 @@ final class ServiceChangesCommand extends Command
 
     private function compile(
         ContainerBuilder $rawContainerBuilder,
-        DecoratorServicePass $decoratorServiceDefinitionsPass
+        DecoratorServicePass $decoratorServiceDefinitionsPass,
     ): void {
         $compiler = $rawContainerBuilder->getCompiler();
 
@@ -326,7 +326,7 @@ final class ServiceChangesCommand extends Command
     private function applyDecoratedDefinitionsStrategy(
         array &$decoratedServicesAssociation,
         string $alias,
-        ?array $decoratedDef = null
+        ?array $decoratedDef = null,
     ): bool {
         if ($decoratedDef !== null &&
             (str_starts_with($alias, sprintf('%s\\', $this->getNamespacePrefix())) ||
@@ -390,7 +390,7 @@ final class ServiceChangesCommand extends Command
     /**
      * @param array<string, string> $decoratedServicesAssociation
      */
-    private function applyAliasStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass,): bool
+    private function applyAliasStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass): bool
     {
         if (!class_exists($alias)) {
             return false;
@@ -411,7 +411,7 @@ final class ServiceChangesCommand extends Command
         array &$decoratedServicesAssociation,
         Definition $definition,
         array $decoratedDefintions,
-        string $definitionClass
+        string $definitionClass,
     ): bool {
         /**
          * @psalm-suppress InternalProperty
