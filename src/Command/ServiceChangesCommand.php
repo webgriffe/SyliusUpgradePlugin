@@ -116,14 +116,14 @@ final class ServiceChangesCommand extends Command
         /** @var array<string, string> $decoratedServicesAssociation */
         $decoratedServicesAssociation = [];
         $syliusServicesWithAppClass = [];
-        $decoratedDefintions = $decoratorServiceDefinitionsPass::$decoratedServices;
+        $decoratedDefinitions = $decoratorServiceDefinitionsPass::$decoratedServices;
 
         $this->outputVerbose("\n\n### DEBUG: Computing decorated services");
 
         $rawDefinitions = $rawContainerBuilder->getDefinitions();
         foreach ($rawDefinitions as $alias => $definition) {
-            $decoratedDefintion = $decoratedDefintions[$alias] ?? null;
-            if ($this->applyDecoratedDefinitionsStrategy($decoratedServicesAssociation, $alias, $decoratedDefintion)) {
+            $decoratedDefinition = $decoratedDefinitions[$alias] ?? null;
+            if ($this->applyDecoratedDefinitionsStrategy($decoratedServicesAssociation, $alias, $decoratedDefinition)) {
                 continue;
             }
 
@@ -146,7 +146,7 @@ final class ServiceChangesCommand extends Command
 
             $isAppClass = str_starts_with($definitionClass, sprintf('%s\\', $this->getNamespacePrefix()));
             if (!$isAppClass) {
-                $this->applyDecoratedDefinitionsNonAppClassStrategy($decoratedServicesAssociation, $decoratedDefintions, $alias, $definitionClass);
+                $this->applyDecoratedDefinitionsNonAppClassStrategy($decoratedServicesAssociation, $decoratedDefinitions, $alias, $definitionClass);
 
                 continue;
             }
@@ -155,7 +155,7 @@ final class ServiceChangesCommand extends Command
                 continue;
             }
 
-            if ($this->applyInnerStrategy($decoratedServicesAssociation, $definition, $decoratedDefintions, $definitionClass)) {
+            if ($this->applyInnerStrategy($decoratedServicesAssociation, $definition, $decoratedDefinitions, $definitionClass)) {
                 continue;
             }
 
