@@ -415,6 +415,8 @@ final class ServiceChangesCommand extends Command
     ): bool {
         /**
          * @psalm-suppress InternalProperty
+         *
+         * @var string|null $innerServiceId
          */
         $innerServiceId = $definition->innerServiceId;
         if ($innerServiceId !== null && str_contains($innerServiceId, '.inner')) {
