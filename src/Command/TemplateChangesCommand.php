@@ -25,7 +25,7 @@ final class TemplateChangesCommand extends Command
 
     private const TEMPLATES_BUNDLES_SUBDIR = 'templates' . DIRECTORY_SEPARATOR . 'bundles' . DIRECTORY_SEPARATOR;
 
-    protected static $defaultName = 'webgriffe:upgrade:template-changes';
+    protected static string $name = 'webgriffe:upgrade:template-changes';
 
     /** @var string */
     private $rootPath;

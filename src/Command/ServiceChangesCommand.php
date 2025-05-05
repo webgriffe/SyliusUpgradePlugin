@@ -36,7 +36,7 @@ final class ServiceChangesCommand extends Command
 
     use BuildDebugContainerTrait;
 
-    protected static $defaultName = 'webgriffe:upgrade:service-changes';
+    protected static string $name = 'webgriffe:upgrade:service-changes';
 
     private ?OutputInterface $output = null;
 
@@ -455,8 +455,6 @@ final class ServiceChangesCommand extends Command
     ): bool {
         /**
          * @psalm-suppress InternalProperty
-         *
-         * @var string|null $innerServiceId
          */
         $innerServiceId = $definition->innerServiceId;
         if ($innerServiceId !== null && str_contains($innerServiceId, '.inner')) {
