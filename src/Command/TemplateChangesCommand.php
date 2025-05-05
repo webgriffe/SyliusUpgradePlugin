@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webgriffe\SyliusUpgradePlugin\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use const DIRECTORY_SEPARATOR;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webgriffe\SyliusUpgradePlugin\Client\GitInterface;
 use Webmozart\Glob\Glob;
 
+#[AsCommand('webgriffe:upgrade:template-changes')]
 final class TemplateChangesCommand extends Command
 {
     public const FROM_VERSION_ARGUMENT_NAME = 'from';
@@ -24,8 +26,6 @@ final class TemplateChangesCommand extends Command
     public const LEGACY_MODE_OPTION_NAME = 'legacy';
 
     private const TEMPLATES_BUNDLES_SUBDIR = 'templates' . DIRECTORY_SEPARATOR . 'bundles' . DIRECTORY_SEPARATOR;
-
-    protected static string $name = 'webgriffe:upgrade:template-changes';
 
     /** @var string */
     private $rootPath;
