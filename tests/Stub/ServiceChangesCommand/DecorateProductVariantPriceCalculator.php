@@ -18,4 +18,9 @@ final class DecorateProductVariantPriceCalculator implements ProductVariantPrice
     {
         return 0;
     }
+
+    public function calculateLowestPriceBeforeDiscount(ProductVariantInterface $productVariant, array $context): ?int
+    {
+        return 0;
+    }
 }

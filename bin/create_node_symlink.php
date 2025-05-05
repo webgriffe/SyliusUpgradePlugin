@@ -29,7 +29,7 @@ if (!$success && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     exec(sprintf('mklink /J %s %s 2> NUL', NODE_MODULES_FOLDER_NAME, PATH_TO_NODE_MODULES), $output, $returnCode);
     $success = $returnCode === 0;
     if (!$success) {
-	echo '> Failed o create the required symlink' . PHP_EOL;
+        echo '> Failed o create the required symlink' . PHP_EOL;
         exit(2);
     }
 }
