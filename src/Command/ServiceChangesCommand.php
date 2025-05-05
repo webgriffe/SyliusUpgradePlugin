@@ -7,6 +7,7 @@ namespace Webgriffe\SyliusUpgradePlugin\Command;
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Command\BuildDebugContainerTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,6 +23,7 @@ use Webmozart\Assert\Assert;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
+#[AsCommand('webgriffe:upgrade:service-changes')]
 final class ServiceChangesCommand extends Command
 {
     public const FROM_VERSION_ARGUMENT_NAME = 'from';
@@ -35,8 +37,6 @@ final class ServiceChangesCommand extends Command
     public const NO_CHANGES_OPTION_NAME = 'no-changes';
 
     use BuildDebugContainerTrait;
-
-    protected static string $name = 'webgriffe:upgrade:service-changes';
 
     private ?OutputInterface $output = null;
 
