@@ -1,6 +1,6 @@
 imports:
-    - { resource: "../../Behat/Resources/services.xml" }
     - { resource: "../../../vendor/sylius/sylius/src/Sylius/Behat/Resources/config/services.xml" }
+    - { resource: "../../Behat/Resources/services.xml" }
 
 # workaround needed for strange "test.client.history" problem
 # see https://github.com/FriendsOfBehat/SymfonyExtension/issues/88
@@ -35,12 +35,12 @@ services:
     # decorate via interface
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed.decorate_order_email_manager:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateOrderEmailManagerInterface
-        decorates: 'Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManagerInterface'
+        decorates: 'Sylius\Bundle\CoreBundle\CommandDispatcher\ResendOrderConfirmationEmailDispatcherInterface'
 
     # decorated BUT not changed
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed.decorate_customer_unique_address_adder:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateCustomerUniqueAddressAdder
-        decorates: sylius.customer_unique_address_adder
+        decorates: sylius.adder.customer.unique_address
 
 
 
@@ -48,7 +48,7 @@ services:
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_province_naming_provider:
         public: true
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed\DecorateProvinceNamingProvider
-        decorates: sylius.province_naming_provider
+        decorates: sylius.provider.province_naming
         arguments:
             - '@.inner'
 
@@ -63,7 +63,7 @@ services:
     # decorated BUT not changed
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed.decorate_customer_order_addresses_saver:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_decorated_definition_strategy_those_decorated_services_that_changed\DecorateCustomerOrderAddressesSaver
-        decorates: sylius.customer_order_addresses_saver
+        decorates: sylius.saver.customer.order_addresses
         arguments:
             - '@.inner'
 
@@ -72,13 +72,12 @@ services:
     ## test_it_detects_with_alias_strategy_those_decorated_services_that_changed
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_decorated_services_that_changed.decorate_send_order_confirmation:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendOrderConfirmationHandler
-        decorates: Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler
+        decorates: sylius_api.command_handler.checkout.send_order_confirmation
 
     # decorated BUT not changed
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_decorated_services_that_changed.decorate_send_shipment_confirmation_email_handler:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendShipmentConfirmationEmailHandler
-        decorates: Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendShipmentConfirmationEmailHandler
-
+        decorates: sylius_api.command_handler.checkout.send_shipment_confirmation_email
 
     ## test_it_alerts_about_services_whose_class_has_changed_but_not_their_alias
     # this
