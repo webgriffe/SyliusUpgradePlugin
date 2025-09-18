@@ -54,8 +54,8 @@ final class ServiceChangesCommandTest extends KernelTestCase
 Computing modified services between 1.11.0 and 1.12.0
 
 Found 2 services that changed and were decorated ([decorated service] -> [decorating service]):
-"Sylius\Bundle\AdminBundle\EmailManager\OrderEmailManager" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateOrderEmailManagerInterface"
-"Sylius\Component\Core\Cart\Context\ShopBasedCartContext" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateNewShopBased"
+"Sylius\Bundle\CoreBundle\CommandDispatcher\ResendOrderConfirmationEmailDispatcher" -> "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed.decorate_order_email_manager"
+"Sylius\Component\Core\Cart\Context\ShopBasedCartContext" -> "webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed.decorate_new_shop_based"
 
 Found 1 services that must be checked manually because the related alias referes to a Sylius service. Actually it's impossible to detect if the original class changed between versions. Here is the list ([decorated service] -> [decorating service]):
 "sylius.calculator.product_variant_price" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DecorateProductVariantPriceCalculator"
@@ -96,6 +96,11 @@ TXT;
         self::assertEquals($expectedOutput, $output);
     }
 
+    /**
+     * Attention! This test and the related strategy will probably be useless in the future 'cause
+     * Sylius is not using FQCN as service ids anymore. This strategy aimed at that, i kept it with
+     * some questionable decorated services just to keep it working.
+     */
     public function test_it_detects_with_alias_strategy_those_decorated_services_that_changed(): void
     {
         Git::$diffToReturn = file_get_contents(self::FIXTURE_DIR . $this->name() . '/git.diff');
@@ -116,7 +121,7 @@ TXT;
 Computing modified services between 1.11.0 and 1.12.0
 
 Found 1 services that changed and were decorated ([decorated service] -> [decorating service]):
-"Sylius\Bundle\ApiBundle\CommandHandler\Checkout\SendOrderConfirmationHandler" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendOrderConfirmationHandler"
+"Sylius\Behat\Context\Domain\ManagingPriceHistoryContext" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateManagingPriceHistoryContext"
 
 Found 1 services that must be checked manually because the related alias referes to a Sylius service. Actually it's impossible to detect if the original class changed between versions. Here is the list ([decorated service] -> [decorating service]):
 "sylius.calculator.product_variant_price" -> "Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\DecorateProductVariantPriceCalculator"
