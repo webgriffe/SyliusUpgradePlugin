@@ -354,6 +354,13 @@ final class ServiceChangesCommand extends Command
     private function isSyliusService(string $decoratedServiceId): bool
     {
         return str_starts_with($decoratedServiceId, 'sylius.') ||
+            str_starts_with($decoratedServiceId, 'sylius_admin.') ||
+            str_starts_with($decoratedServiceId, 'sylius_api.') ||
+            str_starts_with($decoratedServiceId, 'sylius_shop.') ||
+            str_starts_with($decoratedServiceId, 'sylius_payum.') ||
+            str_starts_with($decoratedServiceId, 'sylius_fixtures.') ||
+            str_starts_with($decoratedServiceId, 'sylius_resources.') ||
+            str_starts_with($decoratedServiceId, 'sylius_abstraction.') ||
             str_starts_with($decoratedServiceId, 'Sylius\\') ||
             str_starts_with($decoratedServiceId, '\\Sylius\\');
     }
@@ -428,6 +435,9 @@ final class ServiceChangesCommand extends Command
     }
 
     /**
+     * Attention! This test strategy will probably be useless in the future 'cause Sylius is not using FQCN as service
+     * ids anymore.
+     *
      * @param array<string, string> $decoratedServicesAssociation
      */
     private function applyAliasStrategy(array &$decoratedServicesAssociation, string $alias, string $definitionClass): bool

@@ -12,6 +12,10 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
+/**
+ * This is a duplicate of \Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass but is keep tracks of
+ * decorated services in a static property to be used in tests.
+ */
 class DecoratorServicePass extends AbstractRecursivePass
 {
     /** @var array[] */
@@ -22,8 +26,9 @@ class DecoratorServicePass extends AbstractRecursivePass
         $definitions = new \SplPriorityQueue();
         $order = \PHP_INT_MAX;
 
-        foreach ($container->getDefinitions() as $id => $definition) {
-            if (!$decorated = $definition->getDecoratedService()) {
+        $allDefinitions = $container->getDefinitions();
+        foreach ($allDefinitions as $id => $definition) {
+            if (($decorated = $definition->getDecoratedService()) === null) {
                 continue;
             }
             $definitions->insert([$id, $definition], [$decorated[2], --$order]);

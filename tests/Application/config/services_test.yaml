@@ -35,7 +35,7 @@ services:
     # decorate via interface
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed.decorate_order_email_manager:
         class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed\DecorateOrderEmailManagerInterface
-        decorates: 'Sylius\Bundle\CoreBundle\CommandDispatcher\ResendOrderConfirmationEmailDispatcherInterface'
+        decorates: sylius.command_dispatcher.resend_order_confirmation_email
 
     # decorated BUT not changed
     webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_inner_substitution_strategy_those_decorated_services_that_changed.decorate_customer_unique_address_adder:
@@ -70,14 +70,10 @@ services:
 
 
     ## test_it_detects_with_alias_strategy_those_decorated_services_that_changed
-    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_decorated_services_that_changed.decorate_send_order_confirmation:
-        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendOrderConfirmationHandler
-        decorates: sylius_api.command_handler.checkout.send_order_confirmation
+    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_decorated_services_that_changed.decorate_managing_price_history_context:
+        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateManagingPriceHistoryContext
+        decorates: Sylius\Behat\Context\Domain\ManagingPriceHistoryContext
 
-    # decorated BUT not changed
-    webgriffe_sylius_upgrade.service_changes_command.test_it_detects_with_alias_strategy_those_decorated_services_that_changed.decorate_send_shipment_confirmation_email_handler:
-        class: Tests\Webgriffe\SyliusUpgradePlugin\Stub\ServiceChangesCommand\test_it_detects_with_alias_strategy_those_decorated_services_that_changed\DecorateSendShipmentConfirmationEmailHandler
-        decorates: sylius_api.command_handler.checkout.send_shipment_confirmation_email
 
     ## test_it_alerts_about_services_whose_class_has_changed_but_not_their_alias
     # this
