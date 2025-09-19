@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\DecoratorServicePass as BaseDecoratorServicePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -31,6 +32,8 @@ final class ServiceChangesCommand extends Command
 
     public const ALIAS_PREFIX_OPTION_NAME = 'alias-prefix';
 
+    public const NO_CHANGES_OPTION_NAME = 'no-changes';
+
     use BuildDebugContainerTrait;
 
     protected static $defaultName = 'webgriffe:upgrade:service-changes';
@@ -45,6 +48,8 @@ final class ServiceChangesCommand extends Command
 
     private ?string $aliasPrefix = null;
 
+    private bool $noChanges;
+
     public function __construct(private GitInterface $gitClient, string $name = null)
     {
         parent::__construct($name);
@@ -54,7 +59,9 @@ final class ServiceChangesCommand extends Command
     {
         $this
             ->setDescription(
-                'Print the list of your services that decorates or replaces a service that changed between two given Sylius versions.',
+                'Print the list of your services that decorates or replaces a service that changed between two' .
+                ' given Sylius versions. It\'s possible to obtain just the list of changed services buy using the' .
+                ' --no-changes option.',
             )
             ->addArgument(
                 self::FROM_VERSION_ARGUMENT_NAME,
@@ -69,17 +76,24 @@ final class ServiceChangesCommand extends Command
             ->addOption(
                 self::NAMESPACE_PREFIX_OPTION_NAME,
                 'np',
-                InputArgument::OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The first part of the namespace of your app services, like "App" in "App\Calculator\PriceCalculator". Default: "App".',
                 'App',
             )
             ->addOption(
                 self::ALIAS_PREFIX_OPTION_NAME,
                 'ap',
-                InputArgument::OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The first part of the alias of your app services, like "app" in "app.calculator.price". Default: "app".',
                 'App',
-            );
+            )
+            ->addOption(
+                self::NO_CHANGES_OPTION_NAME,
+                null,
+                InputOption::VALUE_NONE,
+                'If set, it will return just the list of decorated/replaced services.',
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -164,8 +178,28 @@ final class ServiceChangesCommand extends Command
             }
         }
 
-        if (!($this->computeServicesThatChanged($decoratedServicesAssociation))) {
-            $this->writeLine('No changes detected');
+        if ($this->noChanges) {
+            $this->writeLine(sprintf('Found %s services that has been decorated/replaced', count($decoratedServicesAssociation)));
+            foreach ($decoratedServicesAssociation as $newService => $oldService) {
+                $this->writeLine(sprintf('"%s" -> "%s"', $oldService, $newService));
+            }
+        } else {
+            if ($this->isBewtweenSyliusOneAndTwo()) {
+                $this->writeLine('');
+                $this->writeLine('');
+                $this->writeLine(
+                    'Attention! A lot of services changed their FQCN between Sylius 1 and 2, therefore it\'s not' .
+                    ' possible to detect automatically all the changes. Please, rerun this command with the' .
+                    ' --' . self::NO_CHANGES_OPTION_NAME . ' option and check manually the list of decorated/replaced' .
+                    ' services that is returned.',
+                );
+                $this->writeLine('');
+                $this->writeLine('');
+            }
+
+            if (!($this->computeServicesThatChanged($decoratedServicesAssociation))) {
+                $this->writeLine('No changes detected');
+            }
         }
 
         if (count($syliusServicesWithAppClass) > 0) {
@@ -309,6 +343,12 @@ final class ServiceChangesCommand extends Command
             throw new \RuntimeException(sprintf('Option "%s" is not a valid non-empty string', self::NAMESPACE_PREFIX_OPTION_NAME));
         }
         $this->aliasPrefix = $aliasPrefix;
+
+        $noChanges = $input->getOption(self::NO_CHANGES_OPTION_NAME);
+        if (!is_bool($noChanges)) {
+            throw new \RuntimeException(sprintf('Option "%s" is not a valid value', self::NAMESPACE_PREFIX_OPTION_NAME));
+        }
+        $this->noChanges = $noChanges;
     }
 
     private function isSyliusService(string $decoratedServiceId): bool
@@ -444,7 +484,7 @@ final class ServiceChangesCommand extends Command
         $value = $this->fromVersion;
         Assert::notNull($value);
 
-        return $value;
+        return trim($value);
     }
 
     private function getToVersion(): string
@@ -452,7 +492,7 @@ final class ServiceChangesCommand extends Command
         $value = $this->toVersion;
         Assert::notNull($value);
 
-        return $value;
+        return trim($value);
     }
 
     private function getNamespacePrefix(): string
@@ -469,5 +509,14 @@ final class ServiceChangesCommand extends Command
         Assert::notNull($value);
 
         return $value;
+    }
+
+    private function isBewtweenSyliusOneAndTwo(): bool
+    {
+        $from = $this->getFromVersion();
+        $to = $this->getToVersion();
+
+        return (str_starts_with($from, '1.') && str_starts_with($to, '2.')) ||
+            (str_starts_with($from, '2.') && str_starts_with($to, '1.'));
     }
 }
