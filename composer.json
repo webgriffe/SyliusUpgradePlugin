@@ -11,7 +11,7 @@
         "php": "^8.2",
         "php-http/message-factory": "^1.1",
         "psr/http-factory": "^1.1",
-        "sylius/sylius": "~2.0.0",
+        "sylius/sylius": "^2.0",
         "webmozart/glob": "^4.7"
     },
     "require-dev": {
